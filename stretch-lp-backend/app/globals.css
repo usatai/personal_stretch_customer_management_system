@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* カレンダーのルート要素に対するスタイル */
+.react-datepicker {
+    /* 全体のフォントサイズを小さくする */
+    font-size: 0.75rem; /* 標準よりかなり小さく設定 */
+}
+  
+/* 日付セルと曜日のフォントサイズ、パディングを調整 */
+/* react-datepicker のインラインカレンダー内の要素に限定して上書き */
+.react-datepicker__header,
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__time-name {
+    /* セルのパディングを減らす */
+    padding: 0.1rem; 
+    /* セル間のマージンを減らす */
+    margin: 0.02rem; 
+    /* フォントサイズを小さくする */
+    font-size: 0.7rem; 
+}
+
+/* 月/年を表示するヘッダー部分 */
+.react-datepicker__current-month {
+    font-size: 0.8rem;
+}
+
+/* 選択された日付のスタイルも小さくする */
+.react-datepicker__day--selected {
+    /* 選択時の丸い背景が小さくなるように高さを調整 */
+    line-height: 1.5rem; 
+    height: 1.5rem;
+    width: 1.5rem;
+}
