@@ -61,8 +61,8 @@ export default function Bookings () {
     const bookings: Booking[] = useMemo(() => {
         const day = formatYMD(currentDate);
         return [
-            { id: 'b1', title: '山田 太郎 様', start: `${day}T10:00:00`, end: `${day}T11:00:00`, color: '#22c55e' },
-            { id: 'b2', title: '佐藤 花子 様', start: `${day}T09:00:00`, end: `${day}T10:00:00`, color: '#3b82f6' },
+            { id: 'b1', title: '山田 太郎 様', start: `${day}T09:00:00`, end: `${day}T10:00:00`, color: '#22c55e' },
+            { id: 'b2', title: '佐藤 花子 様', start: `${day}T09:00:00`, end: `${day}T11:00:00`, color: '#3b82f6' },
             { id: 'b3', title: '鈴木 次郎 様', start: `${day}T11:00:00`, end: `${day}T12:00:00`, color: '#f59e0b' },
             { id: 'b4', title: 'テスト 予約', start: `${day}T17:00:00`, end: `${day}T18:30:00`, color: '#ef4444' },
         ];
@@ -82,7 +82,7 @@ export default function Bookings () {
         const startOffsetMin = clamp(minutesFromDayStart(start), 0, (endHour - startHour) * 60);
         const endOffsetMin = clamp(minutesFromDayStart(end), 0, (endHour - startHour) * 60);
 
-        const startRow = Math.floor(startOffsetMin / 30) + 1; // grid row start (1-based)
+        const startRow = Math.floor(startOffsetMin / 30) + 1;
         const spanRows = Math.max(1, Math.ceil((endOffsetMin - startOffsetMin) / 30));
 
         return { startRow, spanRows };
@@ -219,7 +219,7 @@ export default function Bookings () {
                                 <div className="grid" style={{ gridTemplateColumns: '64px 1fr' }}>
                                     {/* 左：時間ラベル列 */}
                                     <div className="border-r border-cyan-200 bg-cyan-50/50">
-                                        <div className="grid" style={{ gridTemplateRows: `repeat(${totalRows}, 55px)` }}>
+                                        <div className="grid" style={{ gridTemplateRows: `repeat(${totalRows}, 58px)` }}>
                                             {timeSlots.map((slot, idx) => (
                                                 <div
                                                     key={slot.label}
@@ -234,15 +234,15 @@ export default function Bookings () {
                                     {/* 右：スケジュール列 */}
                                     <div className="relative">
                                         {/* 背景のグリッド線 */}
-                                        <div className="grid" style={{ gridTemplateRows: `repeat(${totalRows}, 55px)` }}>
+                                        <div className="grid" style={{ gridTemplateRows: `repeat(${totalRows}, 58px)` }}>
                                             {Array.from({ length: totalRows }).map((_, i) => (
                                                 <div key={i} className={`border-b ${i % 2 === 0 ? 'border-cyan-100' : 'border-cyan-50'}`} />
                                             ))}
                                         </div>
 
                                         {/* 予約ブロック */}
-                                        <div className="absolute inset-0 p-2">
-                                            <div className="grid h-full" style={{ gridTemplateRows: `repeat(${totalRows}, 55px)` }}>
+                                        <div className="absolute inset-0 p-1">
+                                            <div className="grid h-full" style={{ gridTemplateRows: `repeat(${totalRows}, 58px)` }}>
                                                 {(() => {
                                                     const filtered = bookings.filter(b => isSameDay(new Date(b.start), new Date()));
 
@@ -265,6 +265,7 @@ export default function Bookings () {
                                                             const group = [booking, ...overlapping];
                                                             group.forEach(b => processed.add(b.id));
                                                             groups.push(group);
+                                                            console.log(groups);
                                                         } else {
                                                             // 重複がない場合は単独で追加
                                                             processed.add(booking.id);
@@ -273,34 +274,58 @@ export default function Bookings () {
                                                     });
 
                                                     return groups.map((groupBookings, groupIndex) => {
-                                                        const firstBooking = groupBookings[0];
-                                                        const { startRow, spanRows } = getBookingGridPlacement(firstBooking);
-
+                                                        if (groupBookings.length === 0) return null;
+ 
+                                                        // グループ全体の行スパン（最小開始〜最大終了）を算出
+                                                        const placements = groupBookings.map(b => {
+                                                            const { startRow, spanRows } = getBookingGridPlacement(b);
+                                                            return { booking: b, startRow, spanRows, endRow: startRow + spanRows };
+                                                        });
+                                                        const minStartRow = Math.min(...placements.map(p => p.startRow));
+                                                        const maxEndRow = Math.max(...placements.map(p => p.endRow));
+                                                        const groupSpan = Math.max(1, maxEndRow - minStartRow);
+ 
+                                                        const columnCount = Math.max(1, placements.length);
+ 
                                                         return (
                                                             <div
-                                                                key={`group-${groupIndex}-${firstBooking.id}`}
-                                                                className="flex gap-1"
-                                                                style={{
-                                                                    gridRow: `${startRow} / span ${spanRows}`,
-                                                                }}
+                                                                key={`group-${groupIndex}-${placements[0].booking.id}`}
+                                                                // グループ全体の配置（親グリッド上）
+                                                                style={{ gridRow: `${minStartRow} / span ${groupSpan}` }}
+                                                                className="grid gap-1"
                                                             >
-                                                                {groupBookings.map(booking => (
-                                                                    <div
-                                                                        key={booking.id}
-                                                                        className="rounded-xl shadow-md text-white text-[11px] sm:text-sm p-2 sm:p-3 overflow-hidden flex-1 min-w-0"
-                                                                        style={{
-                                                                            backgroundColor: booking.color || '#06b6d4',
-                                                                            opacity: 0.95,
-                                                                        }}
-                                                                    >
-                                                                        <div className="font-semibold truncate">{booking.title}</div>
-                                                                        <div className="text-white/90 text-[10px] sm:text-xs">
-                                                                            {new Date(booking.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                            {' - '}
-                                                                            {new Date(booking.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
+                                                                {/* グループ内をさらにグリッド化（行＝groupSpan、列＝重なり数） */}
+                                                                <div
+                                                                    className="grid"
+                                                                    style={{
+                                                                        gridTemplateRows: `repeat(${groupSpan}, 54px)`,
+                                                                        gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
+                                                                        gap: '4px',
+                                                                    }}
+                                                                >
+                                                                    {placements.map((p, colIndex) => {
+                                                                        const relativeStart = (p.startRow - minStartRow) + 1; // グループ内での開始行（1-based）
+                                                                        return (
+                                                                            <div
+                                                                                key={p.booking.id}
+                                                                                className="rounded-xl shadow-md text-white text-[11px] sm:text-sm p-2 sm:p-3 overflow-hidden min-w-0"
+                                                                                style={{
+                                                                                    gridRow: `${relativeStart} / span ${p.spanRows}`,
+                                                                                    gridColumn: `${colIndex + 1} / span 1`,
+                                                                                    backgroundColor: p.booking.color || '#06b6d4',
+                                                                                    opacity: 0.95,
+                                                                                }}
+                                                                            >
+                                                                                <div className="font-semibold truncate">{p.booking.title}</div>
+                                                                                <div className="text-white/90 text-[10px] sm:text-xs">
+                                                                                    {new Date(p.booking.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                                    {' - '}
+                                                                                    {new Date(p.booking.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
                                                             </div>
                                                         );
                                                     });
