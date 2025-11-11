@@ -10,7 +10,6 @@ interface SettingCardProps {
   children: ReactNode;
 }
 
-// React.FC（Functional Component）を使用して型付け
 const SettingCard: React.FC<SettingCardProps> = ({ title, description, children }) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transition-shadow duration-300 hover:shadow-xl">
