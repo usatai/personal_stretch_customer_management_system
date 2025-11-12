@@ -126,21 +126,29 @@ export default function Bookings () {
                         </button>
                     </div>
                 </div>
+                
 
                 {/* メインエリア */}
                 <main className="flex-1 w-full md:pl-12">
+                    {/* トップバー（モバイル） */}
+                    <div className="sticky top-0 z-20 flex items-center gap-3 bg-gray-100 px-4 py-3 backdrop-blur md:hidden">
+                        <button
+                            type="button"
+                            aria-label="メニューを開閉"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white shadow-sm active:scale-[0.98]"
+                            onClick={() => setSidebarOpen((v) => !v)}
+                        >
+                            {/* ハンバーガーアイコン */}
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
                     <div className="min-h-screen p-4 sm:p-6">
                         <div className="mx-auto max-w-5xl">
                             {/* ヘッダー：日付と操作 */}
                             <div className="sticky top-0 z-10 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 mb-3 sm:mb-4 bg-gradient-to-br from-cyan-50/95 via-sky-50/95 to-blue-50/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
                                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                                    <button
-                                        className="md:hidden mr-2 inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50"
-                                        onClick={() => setSidebarOpen(true)}
-                                        type="button"
-                                    >
-                                        メニュー
-                                    </button>
                                     <button
                                         className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
                                         onClick={() => setCurrentDate(addDays(currentDate, -1))}

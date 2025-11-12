@@ -29,9 +29,9 @@ export default function Settings() {
             </div>
 
             {/* メインコンテンツ */}
-            <div className="flex-1 w-full md:pl-0 pt-5 bg-gradient-to-br from-cyan-50/95 via-sky-50/95 to-blue-50/95">
+            <div className="flex-1 w-full md:pl-0 bg-gradient-to-br from-cyan-50/95 via-sky-50/95 to-blue-50/95">
                 {/* トップバー（モバイル） */}
-                <div className="sticky top-0 z-20 flex items-center gap-3 bg-gray-50/80 px-4 py-3 backdrop-blur md:hidden">
+                <div className="sticky top-0 z-20 flex items-center gap-3 bg-gray-100 px-4 py-3 backdrop-blur md:hidden">
                     <button
                         type="button"
                         aria-label="メニューを開閉"
@@ -43,14 +43,13 @@ export default function Settings() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-                    <div className="text-base font-semibold text-gray-800">設定</div>
                 </div>
 
                 {/* ページヘッダー */}
                 <div className="px-2 pt-8 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-7xl">
-                        <h1 className="text-2xl font-bold text-gray-900">管理アカウント設定</h1>
-                        <p className="mt-1 text-sm text-gray-600">顧客管理システムのユーザー管理ができます</p>
+                        <h1 className="text-2xl font-bold text-gray-900 text-center md:text-left">管理アカウント設定</h1>
+                        <p className="mt-1 text-sm text-gray-600 text-center md:text-left">顧客管理システムのユーザー管理ができます</p>
                     </div>
                 </div>
 
