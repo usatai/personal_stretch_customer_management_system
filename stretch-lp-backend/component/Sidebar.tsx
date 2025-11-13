@@ -1,7 +1,7 @@
 const menuItems = [
     { label: '予約一覧', href: '/bookings' },
     { label: '顧客管理', href: '/customers' },
-    { label: 'スケジュール', href: '/schedule' },
+    // { label: 'スケジュール', href: '/schedule' },
     { label: '設定', href: '/settings' },
 ];
 

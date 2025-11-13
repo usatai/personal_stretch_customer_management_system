@@ -122,7 +122,7 @@ export default function Bookings () {
                             className="absolute right-3 top-3 inline-flex items-center justify-center rounded-md bg-white/10 px-2 py-1 text-xs text-white backdrop-blur md:hidden"
                             onClick={() => setSidebarOpen(false)}
                         >
-                            閉じる
+                            ×
                         </button>
                     </div>
                 </div>
@@ -131,7 +131,7 @@ export default function Bookings () {
                 {/* メインエリア */}
                 <main className="flex-1 w-full md:pl-12">
                     {/* トップバー（モバイル） */}
-                    <div className="sticky top-0 z-20 flex items-center gap-3 bg-gray-100 px-4 py-3 backdrop-blur md:hidden">
+                    <div className="top-0 z-20 flex items-center gap-3 bg-gray-100 px-4 py-3 backdrop-blur md:hidden">
                         <button
                             type="button"
                             aria-label="メニューを開閉"
@@ -273,7 +273,6 @@ export default function Bookings () {
                                                             const group = [booking, ...overlapping];
                                                             group.forEach(b => processed.add(b.id));
                                                             groups.push(group);
-                                                            console.log(groups);
                                                         } else {
                                                             // 重複がない場合は単独で追加
                                                             processed.add(booking.id);

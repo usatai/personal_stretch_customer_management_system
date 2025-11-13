@@ -22,6 +22,7 @@ export default function Customers () {
     const [filterPeriod,setFilterPeriod] = useState<string>("all");
     const [filterVisitCount, setFilterVisitCount] = useState<string>('all'); 
     const [sortBy, setSortBy] = useState<string>('lastVisit'); 
+    const [customerId,setCustomerId] = useState<string | null>("");
 
     const demoCustomers: Customer[] = useMemo(() => [
         {
@@ -186,6 +187,20 @@ export default function Customers () {
         return filtered;
     },[demoCustomers, searchQuery, filterPeriod, filterVisitCount, sortBy])
 
+    const formatDate = (dateString : string) => {
+        const date = new Date(dateString);
+        return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+
+    }
+
+    const selectedCustomer = customerId 
+        ? demoCustomers.filter(customer => customer.id === customerId)
+        : null;
+
+    const updateNotes = (notes : string) => {
+
+    }
+
     return (
         <>
             <div className="relative min-h-screen bg-gray-50 md:flex">
@@ -198,7 +213,7 @@ export default function Customers () {
                 )}
                 {/* サイドバー */}
                 <div
-                className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-white shadow-md transition-transform duration-200 ease-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:z-auto`}
+                    className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-white shadow-md transition-transform duration-200 ease-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:z-auto`}
                 >
                     <div className="relative h-full">
                         <Sidebar />
@@ -206,7 +221,7 @@ export default function Customers () {
                 </div>
 
                 <div className="flex-1 w-full md:pl-0 bg-gradient-to-br from-cyan-50/95 via-sky-50/95 to-blue-50/95">
-                    <div className="sticky top-0 z-20 flex items-center gap-3 bg-gray-100 px-4 py-3 backdrop-blur md:hidden">
+                    <div className="top-0 z-20 flex items-center gap-3 bg-gray-100 px-4 py-3 backdrop-blur md:hidden">
                         <button
                                 type="button"
                                 aria-label="メニューを開閉"
@@ -220,7 +235,7 @@ export default function Customers () {
                         </button>
                     </div>
                     {/* メインエリア */}
-                    <div className="px-2 pt-8 sm:px-6 lg:px-8">
+                    <div className="px-4 pt-8 sm:px-6 lg:px-8">
                         <div className="mx-auto max-w-7xl">
                             <div className="mb-6 space-y-4">
                                 <h1 className="text-3xl font-bold text-gray-900 text-center md:text-left">顧客管理</h1>
@@ -292,23 +307,168 @@ export default function Customers () {
                         </div>
 
                         {/* 顧客カードグリッド */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
                             {filteredAndSortedCustomers.map(customer => (
                                 <div
                                     key={customer.id}
                                     className="bg-white rounded-2xl shadow-lg border-2 border-cyan-200/50 hover:border-cyan-400 hover:shadow-xl transition-all duration-200 overflow-hidden group"
                                 >
-                                
-                                </div>
-                            ))}
+                                        <div className="bg-gradient-to-r from-cyan-500 to-blue-500 p-4 text-white">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-xl font-bold backdrop-blur-sm">
+                                                        {customer.name.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-lg">{customer.name}</h3>
+                                                        <p className="text-xs text-white/80">{customer.nameKana}</p>
+                                                    </div>
+                                                </div>
+                                                {/* {getStatusBadge(customer.status)} */}
+                                            </div>
+                                        </div>
+
+                                        {/* カードボディ */}
+                                        <div className="p-4 space-y-3">
+                                            {/* 来店情報 */}
+                                            <div className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg">
+                                                <div>
+                                                    <p className="text-xs text-gray-600">最終来店日</p>
+                                                    <p className="font-semibold text-gray-900">{formatDate(customer.lastVisitDate)}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-xs text-gray-600">来店回数</p>
+                                                    <p className="font-bold text-cyan-600 text-lg">{customer.visitCount}回</p>
+                                                </div>
+                                            </div>
+
+                                            {/* 連絡先情報 */}
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex items-center gap-2 text-gray-700">
+                                                    <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span className="truncate">{customer.email}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-gray-700">
+                                                    <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                    </svg>
+                                                    <span>{customer.phone}</span>
+                                                </div>
+                                            </div>
+
+                                            {/* 備考 */}
+                                            {customer.notes && (
+                                                <div className="p-2 bg-gray-50 rounded-lg">
+                                                    <p className="text-xs text-gray-600 mb-1">備考</p>
+                                                    <p className="text-sm text-gray-800">{customer.notes}</p>
+                                                </div>
+                                            )}
+
+                                            {/* アクションボタン */}
+                                            <div className="flex gap-2 pt-2">
+                                                <button 
+                                                    onClick={() => setCustomerId(customer.id)}
+                                                    className="flex-1 px-3 py-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold rounded-lg transition-colors"
+                                                >
+                                                    詳細
+                                                </button>
+                                                <button className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                                                    予約
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
 
                         </div>
-
                     </div>
                 </div>
-            </div>
+                
+                {selectedCustomer && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                        onClick={() => setCustomerId(null)}
+                    >
+                            {/* 顧客カード詳細 */}
+                            {selectedCustomer.map(customer => (
+                                <div
+                                    key={customer.id}
+                                    onClick={(e) => e.stopPropagation()} 
+                                    className="bg-white rounded-2xl shadow-lg border-2 border-cyan-200/50 hover:border-cyan-400 hover:shadow-xl transition-all duration-200 overflow-hidden group"
+                                >
+                                        <div className="bg-gradient-to-r from-cyan-500 to-blue-500 p-4 pr-50 text-white">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-xl font-bold backdrop-blur-sm">
+                                                        {customer.name.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-lg">{customer.name}</h3>
+                                                        <p className="text-xs text-white/80">{customer.nameKana}</p>
+                                                    </div>
+                                                </div>
+                                                {/* {getStatusBadge(customer.status)} */}
+                                            </div>
+                                        </div>
 
-        </>
+                                        {/* カードボディ */}
+                                        <div className="p-4 space-y-3">
+                                            {/* 来店情報 */}
+                                            <div className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg">
+                                                <div>
+                                                    <p className="text-xs text-gray-600">最終来店日</p>
+                                                    <p className="font-semibold text-gray-900">{formatDate(customer.lastVisitDate)}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-xs text-gray-600">来店回数</p>
+                                                    <p className="font-bold text-cyan-600 text-lg">{customer.visitCount}回</p>
+                                                </div>
+                                            </div>
+
+                                            {/* 連絡先情報 */}
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex items-center gap-2 text-gray-700">
+                                                    <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span className="truncate">{customer.email}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-gray-700">
+                                                    <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                    </svg>
+                                                    <span>{customer.phone}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-gray-700">
+                                                    <span>前回担当トレーナー：</span>
+                                                    <span>田島</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-gray-700">
+                                                    <span>次回予約：</span>
+                                                    <span>なし</span>
+                                                </div>
+                                            </div>
+
+                                            {/* 備考 */}
+                                            <div className="p-2 bg-gray-50 rounded-lg">
+                                                <p className="text-xs text-gray-600 mb-1">備考</p>
+                                                <input
+                                                    type="text"
+                                                    value={customer.notes}
+                                                    onChange={(e) => updateNotes(e.target.value)}
+                                                    className="pl-3 pr-4 py-3 bg-white border border-cyan-200 text-sm rounded-xl w-full focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all text-gray-900 placeholder:text-gray-400" 
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                )}
+
+            </>
     )
     
 }

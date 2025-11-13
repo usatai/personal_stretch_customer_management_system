@@ -31,7 +31,7 @@ export default function Settings() {
             {/* メインコンテンツ */}
             <div className="flex-1 w-full md:pl-0 bg-gradient-to-br from-cyan-50/95 via-sky-50/95 to-blue-50/95">
                 {/* トップバー（モバイル） */}
-                <div className="sticky top-0 z-20 flex items-center gap-3 bg-gray-100 px-4 py-3 backdrop-blur md:hidden">
+                <div className="top-0 z-20 flex items-center gap-3 bg-gray-100 px-4 py-3 backdrop-blur md:hidden">
                     <button
                         type="button"
                         aria-label="メニューを開閉"
@@ -60,19 +60,18 @@ export default function Settings() {
                             title="ユーザー管理" 
                             description="ログインできるユーザーの情報を管理"
                         >
-                        <button className="w-full rounded-lg bg-blue-600 py-2 text-white transition duration-150 hover:bg-blue-700">
-                            ユーザー管理へ
-                        </button>
+                        <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
+                            ユーザー管理設定へ
+                        </a>
                         </SettingCard>
 
                         <SettingCard 
-                        title="通知設定" 
-                        description="メールやプッシュ通知の受信設定を管理します。"
+                            title="権限設定（ロール管理）" 
+                            description="登録したユーザーの権限を設定できます"
                         >
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-700">メール通知</span>
-                            <span className="font-bold text-green-500">ON</span>
-                        </div>
+                        <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
+                            詳細なプライバシー設定へ
+                        </a>
                         </SettingCard>
 
                         <SettingCard 
