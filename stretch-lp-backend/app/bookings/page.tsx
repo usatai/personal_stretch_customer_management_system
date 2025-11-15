@@ -54,7 +54,7 @@ export default function BookingsWithDragDrop() {
     const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
     const [sidebarOpen,setSidebarOpen] = useState<boolean>(false);
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [didDrag, setDidDrag] = useState(false);
     
     const scheduleRef = useRef<HTMLDivElement>(null);
 
@@ -112,6 +112,9 @@ export default function BookingsWithDragDrop() {
 
     const handleMouseMove = (e: React.MouseEvent) => {
         if (!isDragging || !draggedBooking || !scheduleRef.current) return;
+
+        // マウスが動いたら動いたことを記憶
+        setDidDrag(true);
         
         setMousePos({ x: e.clientX, y: e.clientY });
 
@@ -129,64 +132,66 @@ export default function BookingsWithDragDrop() {
     };
 
     const handleMouseUp = () => {
-        if (!isDragging || !draggedBooking || hoveredSlot === null) {
+        if (!isDragging || !draggedBooking) {
             setIsDragging(false);
             setDraggedBooking(null);
             setHoveredSlot(null);
             return;
         }
-    
-        // 1. 必要な計算を "setBookingsState" の「外」で先に行う
-        const newStartMinutes = hoveredSlot * 30 + (startHour * 60);
-        const newStartHour = Math.floor(newStartMinutes / 60);
-        const newStartMin = newStartMinutes % 60;
-    
-        // draggedBooking を使って元の情報を取得
-        const originalStart = new Date(draggedBooking.start);
-        const originalEnd = new Date(draggedBooking.end);
-        const durationMs = originalEnd.getTime() - originalStart.getTime();
-    
-        const day = formatYMD(currentDate);
-        const newStartStr = `${day}T${String(newStartHour).padStart(2, '0')}:${String(newStartMin).padStart(2, '0')}:00`;
-    
-        const newStart = new Date(newStartStr);
-        const newEnd = new Date(newStart.getTime() + durationMs);
-    
-        const newEndDay = formatYMD(newEnd);
-        const newEndHour = String(newEnd.getHours()).padStart(2, '0');
-        const newEndMin = String(newEnd.getMinutes()).padStart(2, '0');
-        const newEndStr = `${newEndDay}T${newEndHour}:${newEndMin}:00`;
-    
-        // 2. 更新後の予約オブジェクトを「先」に作成する
-        const updatedBookingData = {
-            ...draggedBooking,
-            start: newStartStr,
-            end: newEndStr,
-        };
-    
-        // 3. State を更新 (コールバック内では、外で作成したデータを返すだけ)
-        setBookingsState(prev => {
-            const current = prev.length > 0 ? prev : defaultBookings;
-            return current.map(booking => {
-                if (booking.id === draggedBooking.id) {
-                    // ★ ここで変数に代入するのではなく、作成済みのデータを返す
-                    return updatedBookingData;
-                }
-                return booking;
-            });
-        });
+
+        if (didDrag) {
+            console.log("通過");
+
+            if (hoveredSlot === null) {
+
+            } else {
+                 // 1. 必要な計算を "setBookingsState" の「外」で先に行う
+                const newStartMinutes = hoveredSlot * 30 + (startHour * 60);
+                const newStartHour = Math.floor(newStartMinutes / 60);
+                const newStartMin = newStartMinutes % 60;
+                setBookingsState(prev => {
+                    const current = prev.length > 0 ? prev : defaultBookings;
+
+                    return current.map(booking => {
+                        if (booking.id === draggedBooking.id) {
+                            const originalStart = new Date(booking.start);
+                            const originalEnd = new Date(booking.end);
+                            const durationMs = originalEnd.getTime() - originalStart.getTime();
+
+                            const day = formatYMD(currentDate);
+                            // 1. 新しい開始時刻の「ローカル文字列」を作成
+                            const newStartStr = `${day}T${String(newStartHour).padStart(2, '0')}:${String(newStartMin).padStart(2, '0')}:00`;
+
+                            // 2. Dateオブジェクトを作成して終了時刻を計算
+                            const newStart = new Date(newStartStr);
+                            const newEnd = new Date(newStart.getTime() + durationMs);
+
+                            // 3. newEnd も「ローカル文字列」としてフォーマットする
+                            //    (日付をまたぐ可能性を考慮して newEnd から年月日を取得)
+                            const newEndDay = formatYMD(newEnd); // 日付が変わる場合に対応
+                            const newEndHour = String(newEnd.getHours()).padStart(2, '0');
+                            const newEndMin = String(newEnd.getMinutes()).padStart(2, '0');
+                            const newEndStr = `${newEndDay}T${newEndHour}:${newEndMin}:00`;
+
+
+                            return {
+                                ...booking,
+                                start: newStartStr,
+                                end: newEndStr,
+                            };
+                        }
+                        return booking;
+                    });
+                })
+            }
+        } else {
+            setSelectedBooking(draggedBooking); // 表示する予約データをセット
+        }
     
         // 4. ドラッグ状態をリセット
         setIsDragging(false);
         setDraggedBooking(null);
         setHoveredSlot(null);
-    
-        // 5. モーダルを開く
-        // (updatedBookingData はこのスコープで確実に利用可能)
-        if (updatedBookingData) {
-            setSelectedBooking(updatedBookingData); // 表示する予約データをセット
-            setIsDetailModalOpen(true);        // モーダルを開く
-        }
     };
 
     return (
@@ -368,7 +373,10 @@ export default function BookingsWithDragDrop() {
                                                                             gridColumn: `${colIndex + 1} / span 1`,
                                                                             backgroundColor: p.booking.color || '#06b6d4',
                                                                         }}
-                                                                        onMouseDown={(e) => handleMouseDown(e, p.booking)}
+                                                                        onMouseDown={(e) => {
+                                                                            setDidDrag(false);
+                                                                            handleMouseDown(e, p.booking)
+                                                                        }}
                                                                     >
                                                                         <div className="font-semibold truncate">{p.booking.title}</div>
                                                                         <div className="text-white/90 text-[10px] sm:text-xs">
@@ -392,7 +400,7 @@ export default function BookingsWithDragDrop() {
                 </div>
 
                 {/* ドラッグ中のプレビュー */}
-                {isDragging && draggedBooking && (
+                {isDragging && draggedBooking && didDrag && (
                     <div
                         className="fixed pointer-events-none z-50 rounded-xl shadow-2xl text-white text-sm p-3 opacity-80"
                         style={{
@@ -413,23 +421,115 @@ export default function BookingsWithDragDrop() {
 
 
                 {/* 予約詳細画面作成 */}
-                {isDetailModalOpen && selectedBooking && (
+                {selectedBooking && (
                     <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
-                    // onClick={() => setCustomerId(null)}
+                    // 1. オーバーレイ (背景)
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    // オーバーレイクリックで閉じる
+                    onClick={() => {
+                        // setIsDetailModalOpen(false);
+                        setSelectedBooking(null);
+                    }}
+                >
+                    {/* 2. モーダルパネル (コンテンツ本体) */}
+                    <div
+                        // モーダル内部のクリックが、背景のonClickに伝播(バブリング)するのを防ぐ
+                        onClick={(e) => e.stopPropagation()} 
+                        // モーダルのスタイル (白背景、角丸、影、サイズ)
+                        className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 text-gray-900"
                     >
-                        <div
-                            key={selectedBooking.id}
-                            className={`rounded-xl shadow-md text-white text-[11px] sm:text-sm p-2 sm:p-3 overflow-hidden cursor-grab active:cursor-grabbing select-none transition-opacity`}
-                        >
-                            <div className="font-semibold truncate">{selectedBooking.title}</div>
-                            <div className="text-white/90 text-[10px] sm:text-xs">
-                                {new Date(selectedBooking.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                {' - '}
-                                {new Date(selectedBooking.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {/* --- ヘッダー --- */}
+                        <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                            <h3 className="text-lg font-semibold">
+                                予約詳細
+                            </h3>
+                            <button
+                                onClick={() => {
+                                    // setIsDetailModalOpen(false);
+                                    setSelectedBooking(null);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                            >
+                                {/* Xボタン (Heroiconsより) */}
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+            
+                        {/* --- ボディ --- */}
+                        <div className="p-6 space-y-4">
+                            {/* 予約タイトル */}
+                            <div>
+                                <h4 className="text-sm font-medium text-gray-500">タイトル</h4>
+                                <p className="text-lg">{selectedBooking.title || '（タイトルなし）'}</p>
+                            </div>
+                            
+                            {/* 日時 */}
+                            <div>
+                                <h4 className="text-sm font-medium text-gray-500">日時</h4>
+                                <p className="text-lg">
+                                    {/* 日付のフォーマット (例) */}
+                                    {new Date(selectedBooking.start).toLocaleDateString('ja-JP', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        weekday: 'short',
+                                    })}
+                                </p>
+                                <p className="text-lg font-mono">
+                                    {/* 時間のフォーマット */}
+                                    {new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                                    {' - '}
+                                    {new Date(selectedBooking.end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                            </div>
+                            
+                            {/* ここに他の情報を追加できます (例: 担当者、メモなど)
+                              {selectedBooking.staff && (
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">担当者</h4>
+                                    <p className="text-lg">{selectedBooking.staff}</p>
+                                </div>
+                              )}
+                            */}
+                        </div>
+            
+                        {/* --- フッター --- */}
+                        <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                            {/* 削除ボタン (左寄せ) */}
+                            <button
+                                className="px-4 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50"
+                                onClick={() => {
+                                    alert(`ID: ${selectedBooking.id} を削除します`);
+                                    setSelectedBooking(null);
+                                }}
+                            >
+                                削除
+                            </button>
+                            
+                            {/* 閉じる・編集ボタン (右寄せ) */}
+                            <div className="space-x-3">
+                                <button
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100"
+                                    onClick={() => {
+                                        alert('編集モードを開始します');
+                                    }}
+                                >
+                                    編集
+                                </button>
+                                <button
+                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {
+                                        setSelectedBooking(null);
+                                    }}
+                                >
+                                    閉じる
+                                </button>
                             </div>
                         </div>
                     </div>
+                </div>
                 )}    
             </div>
         </div>
