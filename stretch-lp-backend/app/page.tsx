@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { setAccessToken } from "@/utils/apiClient";
 
 
 export default function TrainerLogin() {
@@ -27,15 +28,22 @@ export default function TrainerLogin() {
             })
         });
         if (response.ok) {
-            alert("成功です");
+            const data = await response.json();
+            setAccessToken(data.accessToken);
             router.push('/bookings');
         } else {
-            alert("エラーです");
+            if (response.status === 401) {
+                const errorData = await response.json();
+                alert(errorData.failLogin || "ユーザー名またはパスワードが正しくありません。");
+            } else {
+                // その他のエラー（500 Internal Server Errorなど）
+                alert(`予期せぬエラーが発生しました: ${response.status}`);
+            }
         }
     };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-100 via-sky-100 to-blue-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-100 via-sky-100 to-blue-100 p-5">
       <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl p-10 w-full max-w-md border border-cyan-200/50">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl mb-6 shadow-lg">
