@@ -64,12 +64,11 @@ export default function BookingsWithDragDrop() {
     const totalRows = useMemo(() => (endHour - startHour) * 2 + 1, [startHour, endHour]);
 
     const defaultBookings: Booking[] = useMemo(() => {
-        const day = formatYMD(currentDate);
         return [
-            { id: 'b1', title: '山田 太郎 様', start: `${day}T09:00:00`, end: `${day}T10:00:00`, color: '#22c55e' },
-            { id: 'b2', title: '佐藤 花子 様', start: `${day}T09:00:00`, end: `${day}T11:00:00`, color: '#3b82f6' },
-            { id: 'b3', title: '鈴木 次郎 様', start: `${day}T11:00:00`, end: `${day}T12:00:00`, color: '#f59e0b' },
-            { id: 'b4', title: 'テスト 予約', start: `${day}T17:00:00`, end: `${day}T18:30:00`, color: '#ef4444' },
+            { id: 'b1', title: '山田 太郎 様', start: `2025-11-16T09:00:00`, end: `2025-11-16T10:00:00`, color: '#22c55e' },
+            { id: 'b2', title: '佐藤 花子 様', start: `2025-11-16T09:00:00`, end: `2025-11-16T11:00:00`, color: '#3b82f6' },
+            { id: 'b3', title: '鈴木 次郎 様', start: `2025-11-17T11:00:00`, end: `2025-11-17T12:00:00`, color: '#f59e0b' },
+            { id: 'b4', title: 'テスト 予約', start: `2025-11-18T17:00:00`, end: `2025-11-18T18:30:00`, color: '#ef4444' },
         ];
     }, [currentDate]);
 
@@ -194,6 +193,52 @@ export default function BookingsWithDragDrop() {
         setHoveredSlot(null);
     };
 
+    const statusOptions = [
+        { label: "完了", color: "#22c55e" },
+        { label: "予約確定", color: "#3b82f6" },
+        { label: "仮予約", color: "#f59e0b" },
+        { label: "キャンセル", color: "#ef4444" },
+    ];
+    
+    const getSortedStatusOptions = (color : string) => {
+        return statusOptions.slice().sort((a,b) => {
+            if (a.color === color) return -1; 
+            if (b.color === color) return 1;
+            return 0;
+        });
+    };
+
+    const generateTimeOptions = () => {
+        const times: string[] = [];
+        for (let h = 0; h < 24; h++) {
+          for (let m = 0; m < 60; m++) {
+            const hh = h.toString().padStart(2, '0');
+            const mm = m.toString().padStart(2, '0');
+            times.push(`${hh}:${mm}`);
+          }
+        }
+        return times;
+      };
+    
+    const timeOptions = generateTimeOptions();
+
+      // selectが変わった時のハンドラ
+    const handleStartChange = (e: React.ChangeEvent<HTMLSelectElement>,booking : Booking) => {
+        const [hours, minutes] = e.target.value.split(':').map(Number);
+        const newStart = new Date(booking.start);
+        newStart.setHours(hours, minutes);
+        if (!selectedBooking) return;
+        setSelectedBooking({ ...selectedBooking, start: newStart.toISOString() });
+    };
+
+    const handleEndChange = (e: React.ChangeEvent<HTMLSelectElement>,booking : Booking) => {
+        const [hours, minutes] = e.target.value.split(':').map(Number);
+        const newEnd = new Date(booking.end);
+        newEnd.setHours(hours, minutes);
+        if (!selectedBooking) return;
+        setSelectedBooking({ ...selectedBooking, end: newEnd.toISOString() });
+    };
+
     return (
         <div className="relative min-h-screen bg-gray-50 md:flex">
             {/* オーバーレイ（モバイル時サイドバー開時のみ） */}
@@ -208,7 +253,7 @@ export default function BookingsWithDragDrop() {
                 className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-white shadow-md transition-transform duration-200 ease-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:z-auto`}
             >
                 <div className="relative h-full">
-                    <Sidebar />
+                    <Sidebar onClose={() => setSidebarOpen(false)}/>
                 </div>
             </div>
             {/* ヘッダー */}
@@ -316,7 +361,7 @@ export default function BookingsWithDragDrop() {
                                             const processed = new Set<string>();
 
                                             bookings.forEach(booking => {
-                                                if (processed.has(booking.id)) return;
+                                                if (processed.has(booking.id) || booking.start.split('T')[0] !== formatYMD(currentDate)) return;
 
                                                 const overlapping = bookings.filter(b =>
                                                     b.id !== booking.id &&
@@ -479,27 +524,43 @@ export default function BookingsWithDragDrop() {
                                 </p>
                                 <p className="text-lg font-mono">
                                     {/* 時間のフォーマット */}
-                                    {new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                                    <select value={new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleStartChange(e,selectedBooking)}>
+                                        {timeOptions.map((time) => (
+                                        <option key={time} value={time}>
+                                            {time}
+                                        </option>
+                                        ))}
+                                    </select>
                                     {' - '}
-                                    {new Date(selectedBooking.end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                                    <select value={new Date(selectedBooking.end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleEndChange(e,selectedBooking)}>
+                                        {timeOptions.map((time) => (
+                                        <option key={time} value={time}>
+                                            {time}
+                                        </option>
+                                        ))}
+                                    </select>
                                 </p>
                             </div>
                             
-                            {/* ここに他の情報を追加できます (例: 担当者、メモなど)
-                              {selectedBooking.staff && (
-                                <div>
-                                    <h4 className="text-sm font-medium text-gray-500">担当者</h4>
-                                    <p className="text-lg">{selectedBooking.staff}</p>
-                                </div>
-                              )}
-                            */}
+                            {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
+                            <div>
+                                <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
+                                <select className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                    {getSortedStatusOptions(selectedBooking.color!).map(opt => (
+                                        <option key={opt.color} value={opt.color}>
+                                            {opt.label}
+                                        </option>
+                                    ))}      
+                                </select>
+                            </div>
+                           
                         </div>
             
                         {/* --- フッター --- */}
                         <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
                             {/* 削除ボタン (左寄せ) */}
                             <button
-                                className="px-4 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50"
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-gray-300 rounded-lg hover:bg-red-700"
                                 onClick={() => {
                                     alert(`ID: ${selectedBooking.id} を削除します`);
                                     setSelectedBooking(null);
@@ -516,7 +577,7 @@ export default function BookingsWithDragDrop() {
                                         alert('編集モードを開始します');
                                     }}
                                 >
-                                    編集
+                                    変更
                                 </button>
                                 <button
                                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"

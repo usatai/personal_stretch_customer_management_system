@@ -3,15 +3,32 @@ const menuItems = [
     { label: '顧客管理', href: '/customers' },
     // { label: 'スケジュール', href: '/schedule' },
     { label: '設定', href: '/settings' },
+    { label: 'ログアウト', href: '/logout' },
 ];
 
-export default function Sidebar() {
+type SidebarProps = {
+    onClose?: () => void; // なくてもOKな引数
+};
+
+export default function Sidebar({ onClose }: SidebarProps) {
     return (
         <aside className="h-full w-full bg-slate-600 text-white px-5 py-8 flex flex-col">
+
+            <button 
+                className="ml-auto md:hidden"
+                onClick={() => onClose?.()}
+            >
+                {/* Xボタン (Heroiconsより) */}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
             <div className="mb-8">
                 <span className="text-xs uppercase tracking-widest text-slate-400">Stretch Trainer</span>
                 <h2 className="mt-2 text-xl font-bold">管理メニュー</h2>
             </div>
+
 
             <nav className="flex-1 space-y-1">
                 {menuItems.map(item => (
