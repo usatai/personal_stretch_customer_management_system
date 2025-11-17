@@ -1,7 +1,8 @@
 'use client'
 
 import Sidebar from "@/component/Sidebar";
-import { useMemo, useState, useRef } from "react";
+import { apiClient } from "@/utils/apiClient";
+import { useMemo, useState, useRef, useEffect } from "react";
 
 type Booking = {
     id: string;
@@ -55,6 +56,7 @@ export default function BookingsWithDragDrop() {
     const [sidebarOpen,setSidebarOpen] = useState<boolean>(false);
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [didDrag, setDidDrag] = useState(false);
+    const [userData, setClientData] = useState<Booking[]>([]);
     
     const scheduleRef = useRef<HTMLDivElement>(null);
 
@@ -70,6 +72,30 @@ export default function BookingsWithDragDrop() {
             { id: 'b3', title: '鈴木 次郎 様', start: `2025-11-17T11:00:00`, end: `2025-11-17T12:00:00`, color: '#f59e0b' },
             { id: 'b4', title: 'テスト 予約', start: `2025-11-18T17:00:00`, end: `2025-11-18T18:30:00`, color: '#ef4444' },
         ];
+    }, [currentDate]);
+
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                const response = await apiClient("/bookings");
+                if (response.ok) {
+                    let userData = await response.json();
+                    setClientData(userData);
+                } else {
+                    if (response.status === 401) {
+                        const errorData = await response.json();
+                        alert(errorData.failLogin || "ユーザー名またはパスワードが正しくありません。");
+                    } else {
+    
+                    }
+                }
+            } catch (e) {
+                console.error("エラー" + e)
+            }
+        }
+
+        fetchBookings();
+        
     }, [currentDate]);
 
     const bookings = bookingsState.length > 0 ? bookingsState : defaultBookings;
@@ -238,6 +264,8 @@ export default function BookingsWithDragDrop() {
         if (!selectedBooking) return;
         setSelectedBooking({ ...selectedBooking, end: newEnd.toISOString() });
     };
+
+    // 顧客詳細情報変更ボタン
 
     return (
         <div className="relative min-h-screen bg-gray-50 md:flex">
@@ -572,7 +600,7 @@ export default function BookingsWithDragDrop() {
                             {/* 閉じる・編集ボタン (右寄せ) */}
                             <div className="space-x-3">
                                 <button
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100"
+                                    className="px-4 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-gray-100"
                                     onClick={() => {
                                         alert('編集モードを開始します');
                                     }}
