@@ -3,6 +3,8 @@
 import Sidebar from "@/component/Sidebar";
 import { apiClient } from "@/utils/apiClient";
 import { useMemo, useState, useRef, useEffect } from "react";
+import { BackendBooking, CalendarEvent } from "../types";
+import { convertToCalendarEvents } from "@/utils/bookingExchange";
 
 type Booking = {
     id: string;
@@ -56,7 +58,7 @@ export default function BookingsWithDragDrop() {
     const [sidebarOpen,setSidebarOpen] = useState<boolean>(false);
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [didDrag, setDidDrag] = useState(false);
-    const [userData, setClientData] = useState<Booking[]>([]);
+    const [clientData, setClientData] = useState<CalendarEvent[]>([]);
     
     const scheduleRef = useRef<HTMLDivElement>(null);
 
@@ -79,8 +81,11 @@ export default function BookingsWithDragDrop() {
             try {
                 const response = await apiClient("/bookings");
                 if (response.ok) {
-                    let userData = await response.json();
-                    setClientData(userData);
+                    let responseData = await response.json();
+                    const bookingList: BackendBooking[] = responseData.bookingList;
+                    const calendarEvents = convertToCalendarEvents(bookingList);
+                    console.log(calendarEvents);
+                    setClientData(calendarEvents);                 
                 } else {
                     if (response.status === 401) {
                         const errorData = await response.json();
@@ -98,7 +103,7 @@ export default function BookingsWithDragDrop() {
         
     }, [currentDate]);
 
-    const bookings = bookingsState.length > 0 ? bookingsState : defaultBookings;
+    const bookings = bookingsState.length > 0 ? bookingsState : clientData;
 
     const getBookingGridPlacement = (booking: Booking) => {
         const start = new Date(booking.start);
@@ -165,8 +170,6 @@ export default function BookingsWithDragDrop() {
         }
 
         if (didDrag) {
-            console.log("通過");
-
             if (hoveredSlot === null) {
 
             } else {

@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api.personal-stretch.com/api/v1'; // 🚨 バックエンドのAPIドメイン
+const BASE_URL = 'http://localhost:8080/api/v1';// 🚨 バックエンドのAPIドメイン
 
 let accessToken = '';
 
@@ -57,7 +57,7 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
         }
         
         // リフレッシュ失敗 or 再試行失敗の場合、ログイン画面へ強制リダイレクト
-        window.location.href = '/login'; 
+        window.location.href = '/'; 
         return res; // エラーレスポンスを返す（処理を中断）
   
       }
