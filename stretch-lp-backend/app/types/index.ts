@@ -20,8 +20,8 @@ type CustomerData = {
 export type BackendBooking = {
     id: number;
     customers: CustomerData;
-    firstChoiceDate: string;
-    secondChoiceDate: string;
+    firstChoiceDateTime: string;
+    secondChoiceDateTime: string;
     status: string;
     message: string;
     createdAt: string;

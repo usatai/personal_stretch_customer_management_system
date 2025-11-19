@@ -36,7 +36,7 @@ export const convertToCalendarEvents = (bookingList: BackendBooking[]): Calendar
     return bookingList.map(booking => {
         
         // 予約の開始時刻を firstChoiceDate から取得
-        const startTime = booking.firstChoiceDate;
+        const startTime = booking.firstChoiceDateTime;
         const stretchMinutes = booking.choiseStretch || 60;
         
         // 終了時刻は開始時刻の1時間後と仮定して計算
