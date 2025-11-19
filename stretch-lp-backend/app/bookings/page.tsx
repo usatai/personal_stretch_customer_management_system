@@ -178,7 +178,7 @@ export default function BookingsWithDragDrop() {
                 const newStartHour = Math.floor(newStartMinutes / 60);
                 const newStartMin = newStartMinutes % 60;
                 setBookingsState(prev => {
-                    const current = prev.length > 0 ? prev : defaultBookings;
+                    const current = prev.length > 0 ? prev : clientData;
 
                     return current.map(booking => {
                         if (booking.id === draggedBooking.id) {
