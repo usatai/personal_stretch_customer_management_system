@@ -3,12 +3,13 @@ export type CalendarEvent = {
     id: string;
     title: string;
     start: string;
+    stretchCourse: number;
     end: string;
     color?: string;
 };
 
 // バックエンドから返される顧客オブジェクトの型
-type CustomerData = {
+export type CustomerData = {
     id: number;
     customerName: string;
     customerEmail: string;
@@ -22,6 +23,17 @@ export type BackendBooking = {
     customers: CustomerData;
     firstChoiceDateTime: string;
     secondChoiceDateTime: string;
+    status: string;
+    message: string;
+    createdAt: string;
+    choiseStretch: number;
+};
+
+export type DetailBackendBooking = {
+    id: number;
+    customerName: CustomerData;
+    startTime: string;
+    endTime: string;
     status: string;
     message: string;
     createdAt: string;

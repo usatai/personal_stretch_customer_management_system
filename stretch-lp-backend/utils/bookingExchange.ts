@@ -56,6 +56,7 @@ export const convertToCalendarEvents = (bookingList: BackendBooking[]): Calendar
             start: startTime,
             // end: 1時間後の時刻を整形
             end: toISOStringWithoutZ(endDateTime), 
+            stretchCourse:booking.choiseStretch,
             // color: ステータスに応じた色
             color: getColor(booking.status), 
         };

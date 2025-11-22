@@ -2,15 +2,17 @@
 
 import Sidebar from "@/component/Sidebar";
 import { apiClient } from "@/utils/apiClient";
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { BackendBooking, CalendarEvent } from "../types";
 import { convertToCalendarEvents } from "@/utils/bookingExchange";
+import DetailBookings from "@/component/ DetailBooking";
 
 type Booking = {
     id: string;
     title: string;
     start: string;
     end: string;
+    stretchCourse: number;
     color?: string;
 };
 
@@ -67,14 +69,6 @@ export default function BookingsWithDragDrop() {
     const timeSlots = useMemo(() => generateTimeSlots(startHour, endHour), [startHour, endHour]);
     const totalRows = useMemo(() => (endHour - startHour) * 2 + 1, [startHour, endHour]);
 
-    const defaultBookings: Booking[] = useMemo(() => {
-        return [
-            { id: 'b1', title: '山田 太郎 様', start: `2025-11-16T09:00:00`, end: `2025-11-16T10:00:00`, color: '#22c55e' },
-            { id: 'b2', title: '佐藤 花子 様', start: `2025-11-16T09:00:00`, end: `2025-11-16T11:00:00`, color: '#3b82f6' },
-            { id: 'b3', title: '鈴木 次郎 様', start: `2025-11-17T11:00:00`, end: `2025-11-17T12:00:00`, color: '#f59e0b' },
-            { id: 'b4', title: 'テスト 予約', start: `2025-11-18T17:00:00`, end: `2025-11-18T18:30:00`, color: '#ef4444' },
-        ];
-    }, [currentDate]);
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -135,6 +129,7 @@ export default function BookingsWithDragDrop() {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         });
+        console.log(booking);
         setDraggedBooking(booking);
         setIsDragging(true);
         setMousePos({ x: e.clientX, y: e.clientY });
@@ -228,6 +223,12 @@ export default function BookingsWithDragDrop() {
         { label: "仮予約", color: "#f59e0b" },
         { label: "キャンセル", color: "#ef4444" },
     ];
+
+    const statusCourse = [
+        { course: "40分", value: 40 },
+        { course: "60分", value: 60 },
+        { course: "80分", value: 80 },
+    ];
     
     const getSortedStatusOptions = (color : string) => {
         return statusOptions.slice().sort((a,b) => {
@@ -239,7 +240,7 @@ export default function BookingsWithDragDrop() {
 
     const generateTimeOptions = () => {
         const times: string[] = [];
-        for (let h = 0; h < 24; h++) {
+        for (let h = 9; h < 21; h++) {
           for (let m = 0; m < 60; m+=30) {
             const hh = h.toString().padStart(2, '0');
             const mm = m.toString().padStart(2, '0');
@@ -268,7 +269,37 @@ export default function BookingsWithDragDrop() {
         setSelectedBooking({ ...selectedBooking, end: newEnd.toISOString() });
     };
 
+    const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>, booking: Booking) => {
+        if (!selectedBooking) return;
+        setSelectedBooking({ ...selectedBooking, stretchCourse: Number(e.target.value) });
+    };
+
     // 顧客詳細情報変更ボタン
+    const changeBooking = async () => {
+        const numericId = Number(selectedBooking?.id.replace('b', ''));
+        // IDが変換できない（数値以外が含まれるなど）場合はエラーチェックを入れるとより安全です。
+        if (isNaN(numericId)) {
+            throw new Error("予約IDの形式が不正です。");
+        }
+
+        const response = await apiClient("/detailBooking",{
+            method: "PATCH",
+            body: JSON.stringify({
+                id: numericId,
+                start: selectedBooking?.start,
+                end: selectedBooking?.end,
+                color: selectedBooking?.color
+            })
+        });
+
+        if (response.ok) {
+            console.log("更新成功");
+        } else {
+            console.error("更新失敗");
+        }
+
+        setSelectedBooking(null);
+    }
 
     return (
         <div className="relative min-h-screen bg-gray-50 md:flex">
@@ -545,14 +576,27 @@ export default function BookingsWithDragDrop() {
                             <div>
                                 <h4 className="text-sm font-medium text-gray-500">日時</h4>
                                 <p className="text-lg">
-                                    {/* 日付のフォーマット (例) */}
-                                    {new Date(selectedBooking.start).toLocaleDateString('ja-JP', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        weekday: 'short',
-                                    })}
+                                    <select value={new Date(selectedBooking.start).getFullYear()} onChange={(e) => handleStartChange(e,selectedBooking)}>
+                                        <option value="2024">2024</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                    </select>
+                                    {' 年 '}
+                                    <select value={new Date(selectedBooking.start).getMonth() + 1} onChange={(e) => handleEndChange(e,selectedBooking)}>
+                                        {[...Array(12)].map((_, i) => (
+                                            <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                        ))}
+                                    </select>
+                                    {' 月 '}
+
+                                    <select value={new Date(selectedBooking.start).getDate()} onChange={(e) => handleEndChange(e,selectedBooking)}>
+                                        {[...Array(31)].map((_, i) => (
+                                            <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                        ))}
+                                    </select>
+                                    {' 日 '}
                                 </p>
+                                <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
                                 <p className="text-lg font-mono">
                                     {/* 時間のフォーマット */}
                                     <select value={new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleStartChange(e,selectedBooking)}>
@@ -562,11 +606,14 @@ export default function BookingsWithDragDrop() {
                                         </option>
                                         ))}
                                     </select>
-                                    {' - '}
-                                    <select value={new Date(selectedBooking.end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleEndChange(e,selectedBooking)}>
-                                        {timeOptions.map((time) => (
-                                        <option key={time} value={time}>
-                                            {time}
+                                </p>
+                                <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
+                                <p className="text-lg font-mono">
+                                    {/* 時間のフォーマット */}
+                                    <select value={selectedBooking.stretchCourse} onChange={(e) => handleCourseChange(e,selectedBooking)}>
+                                        {statusCourse.map((data) => (
+                                        <option key={data.course} value={data.value}>
+                                            {data.course}
                                         </option>
                                         ))}
                                     </select>
@@ -603,10 +650,8 @@ export default function BookingsWithDragDrop() {
                             {/* 閉じる・編集ボタン (右寄せ) */}
                             <div className="space-x-3">
                                 <button
-                                    className="px-4 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-gray-100"
-                                    onClick={() => {
-                                        alert('編集モードを開始します');
-                                    }}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
+                                    onClick={changeBooking}
                                 >
                                     変更
                                 </button>
