@@ -155,7 +155,7 @@ export default function BookingsWithDragDrop() {
         }
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = async () => {
         if (!isDragging || !draggedBooking) {
             setIsDragging(false);
             setDraggedBooking(null);
@@ -167,44 +167,54 @@ export default function BookingsWithDragDrop() {
             if (hoveredSlot === null) {
 
             } else {
-                 // 1. 必要な計算を "setBookingsState" の「外」で先に行う
+                // 1. 必要な計算
                 const newStartMinutes = hoveredSlot * 30 + (startHour * 60);
                 const newStartHour = Math.floor(newStartMinutes / 60);
                 const newStartMin = newStartMinutes % 60;
+    
+                // 2. draggedBookingから直接updatedBookingを作成
+                const originalStart = new Date(draggedBooking.start);
+                const originalEnd = new Date(draggedBooking.end);
+                const durationMs = originalEnd.getTime() - originalStart.getTime();
+    
+                const day = formatYMD(currentDate);
+                const newStartStr = `${day}T${String(newStartHour).padStart(2, '0')}:${String(newStartMin).padStart(2, '0')}:00`;
+    
+                const newStart = new Date(newStartStr);
+                const newEnd = new Date(newStart.getTime() + durationMs);
+    
+                const newEndDay = formatYMD(newEnd);
+                const newEndHour = String(newEnd.getHours()).padStart(2, '0');
+                const newEndMin = String(newEnd.getMinutes()).padStart(2, '0');
+                const newEndStr = `${newEndDay}T${newEndHour}:${newEndMin}:00`;
+    
+                // 3. 更新後の予約データを先に作成
+                const updatedBooking: Booking = {
+                    ...draggedBooking,
+                    start: newStartStr,
+                    end: newEndStr,
+                };
+    
+                // 4. stateを更新
                 setBookingsState(prev => {
                     const current = prev.length > 0 ? prev : clientData;
-
-                    return current.map(booking => {
-                        if (booking.id === draggedBooking.id) {
-                            const originalStart = new Date(booking.start);
-                            const originalEnd = new Date(booking.end);
-                            const durationMs = originalEnd.getTime() - originalStart.getTime();
-
-                            const day = formatYMD(currentDate);
-                            // 1. 新しい開始時刻の「ローカル文字列」を作成
-                            const newStartStr = `${day}T${String(newStartHour).padStart(2, '0')}:${String(newStartMin).padStart(2, '0')}:00`;
-
-                            // 2. Dateオブジェクトを作成して終了時刻を計算
-                            const newStart = new Date(newStartStr);
-                            const newEnd = new Date(newStart.getTime() + durationMs);
-
-                            // 3. newEnd も「ローカル文字列」としてフォーマットする
-                            //    (日付をまたぐ可能性を考慮して newEnd から年月日を取得)
-                            const newEndDay = formatYMD(newEnd); // 日付が変わる場合に対応
-                            const newEndHour = String(newEnd.getHours()).padStart(2, '0');
-                            const newEndMin = String(newEnd.getMinutes()).padStart(2, '0');
-                            const newEndStr = `${newEndDay}T${newEndHour}:${newEndMin}:00`;
-
-
-                            return {
-                                ...booking,
-                                start: newStartStr,
-                                end: newEndStr,
-                            };
-                        }
-                        return booking;
+                    return current.map(booking => 
+                        booking.id === draggedBooking.id ? updatedBooking : booking
+                    );
+                });
+    
+                // 5. バックエンドに送信
+                try {
+                    await changeBooking(updatedBooking);
+                } catch (error) {
+                    console.error("予約更新エラー:", error);
+                    // エラー時は元の状態に戻す
+                    setBookingsState(prev => {
+                        return prev.map(booking => 
+                            booking.id === draggedBooking.id ? draggedBooking : booking
+                        );
                     });
-                })
+                }
             }
         } else {
             setSelectedBooking(draggedBooking); // 表示する予約データをセット
@@ -305,10 +315,12 @@ export default function BookingsWithDragDrop() {
         setSelectedBooking({ ...selectedBooking, color: e.target.value });
     };
 
-    // 顧客詳細情報変更ボタン
-    const changeBooking = async () => {
-        console.log(selectedBooking);
-        const numericId = Number(selectedBooking?.id.replace('b', ''));
+    // 顧客詳細情報変更
+    const changeBooking = async (draggedBooking?: Booking) => {
+        const bookingToUpdate = draggedBooking || selectedBooking;
+
+        console.log(bookingToUpdate);
+        const numericId = Number(bookingToUpdate?.id.replace('b', ''));
         // IDが変換できない（数値以外が含まれるなど）場合はエラーチェックを入れるとより安全です。
         if (isNaN(numericId)) {
             throw new Error("予約IDの形式が不正です。");
@@ -318,9 +330,9 @@ export default function BookingsWithDragDrop() {
             method: "PUT",
             body: JSON.stringify({
                 id: numericId,
-                start: selectedBooking?.start,
-                stretchCourse: selectedBooking?.stretchCourse,
-                color: selectedBooking?.color
+                start: bookingToUpdate?.start,
+                stretchCourse: bookingToUpdate?.stretchCourse,
+                color: bookingToUpdate?.color
             })
         });
 
@@ -690,7 +702,7 @@ export default function BookingsWithDragDrop() {
                             <div className="space-x-3">
                                 <button
                                     className="px-4 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
-                                    onClick={changeBooking}
+                                    onClick={() => changeBooking()}
                                 >
                                     変更
                                 </button>
