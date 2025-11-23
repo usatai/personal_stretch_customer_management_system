@@ -21,7 +21,7 @@ export default function Settings() {
 
             {/* サイドバー */}
             <div
-                className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-white shadow-md transition-transform duration-200 ease-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:z-auto`}
+                className={`fixed inset-y-0 left-0 z-40 w-54 transform bg-white shadow-md transition-transform duration-200 ease-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:z-auto`}
             >
                 <div className="relative h-full">
                     <Sidebar onClose={() => setSidebarOpen(false)}/>

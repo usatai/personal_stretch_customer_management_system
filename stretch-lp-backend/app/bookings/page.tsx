@@ -358,7 +358,7 @@ export default function BookingsWithDragDrop() {
             )}
             {/* サイドバー */}
             <div
-                className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-white shadow-md transition-transform duration-200 ease-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:z-auto`}
+                className={`fixed inset-y-0 left-0 z-40 w-54 transform bg-white shadow-md transition-transform duration-200 ease-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:z-auto`}
             >
                 <div className="relative h-full">
                     <Sidebar onClose={() => setSidebarOpen(false)}/>
@@ -379,346 +379,347 @@ export default function BookingsWithDragDrop() {
                         </svg>
                     </button>
                 </div>
-            </div>
-            <div
-                className="w-full bg-gradient-to-br from-cyan-50 via-sky-50 to-blue-50 p-4 sm:p-6"
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-            >
-                <div className="mx-auto max-w-5xl">
-                    {/* ヘッダー */}
-                    <div className="sticky top-0 z-10 px-4 sm:px-0 py-3 mb-3 sm:mb-4 bg-gradient-to-br from-cyan-50/95 via-sky-50/95 to-blue-50/95 backdrop-blur">
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                            <button
-                                className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
-                                onClick={() => setCurrentDate(addDays(currentDate, -1))}
-                            >
-                                前日
-                            </button>
-                            <button
-                                className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
-                                onClick={() => setCurrentDate(startOfDay(new Date()))}
-                            >
-                                今日
-                            </button>
-                            <button
-                                className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
-                                onClick={() => setCurrentDate(addDays(currentDate, 1))}
-                            >
-                                翌日
-                            </button>
+           
+                <div
+                    className="w-full bg-gradient-to-br from-cyan-50 via-sky-50 to-blue-50 p-4 sm:p-6"
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                >
+                    <div className="mx-auto max-w-5xl">
+                        {/* ヘッダー */}
+                        <div className="sticky top-0 z-10 px-4 sm:px-0 py-3 mb-3 sm:mb-4 bg-gradient-to-br from-cyan-50/95 via-sky-50/95 to-blue-50/95 backdrop-blur">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                <button
+                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
+                                    onClick={() => setCurrentDate(addDays(currentDate, -1))}
+                                >
+                                    前日
+                                </button>
+                                <button
+                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
+                                    onClick={() => setCurrentDate(startOfDay(new Date()))}
+                                >
+                                    今日
+                                </button>
+                                <button
+                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
+                                    onClick={() => setCurrentDate(addDays(currentDate, 1))}
+                                >
+                                    翌日
+                                </button>
+                            </div>
+                            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="text-xl sm:text-2xl font-bold text-cyan-900">
+                                    {formatYMD(currentDate)}
+                                </div>
+                                <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-cyan-700">
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-block w-3 h-3 rounded-sm bg-[#22c55e]" /> 完了
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-block w-3 h-3 rounded-sm bg-[#3b82f6]" /> 確定
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-block w-3 h-3 rounded-sm bg-[#f59e0b]" /> 仮予約
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-block w-3 h-3 rounded-sm bg-[#ef4444]" /> キャンセル待ち
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="text-xl sm:text-2xl font-bold text-cyan-900">
-                                {formatYMD(currentDate)}
-                            </div>
-                            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-cyan-700">
-                                <div className="flex items-center gap-2">
-                                    <span className="inline-block w-3 h-3 rounded-sm bg-[#22c55e]" /> 完了
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="inline-block w-3 h-3 rounded-sm bg-[#3b82f6]" /> 確定
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="inline-block w-3 h-3 rounded-sm bg-[#f59e0b]" /> 仮予約
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="inline-block w-3 h-3 rounded-sm bg-[#ef4444]" /> キャンセル待ち
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* タイムテーブル */}
-                    <div className="bg-white rounded-2xl shadow border border-cyan-200 overflow-hidden">
-                        <div className="grid" style={{ gridTemplateColumns: '64px 1fr' }}>
-                            {/* 時間ラベル列 */}
-                            <div className="border-r border-cyan-200 bg-cyan-50/50">
-                                <div className="grid" style={{ gridTemplateRows: `repeat(${totalRows}, 58px)` }}>
-                                    {timeSlots.map((slot, idx) => (
-                                        <div
-                                            key={slot.label}
-                                            className={`px-2 sm:px-3 flex items-start ${idx % 2 === 0 ? 'border-b border-cyan-100' : ''}`}
-                                        >
-                                            <span className="text-[10px] sm:text-xs text-cyan-700 pt-2">{slot.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* スケジュール列 */}
-                            <div className="relative" ref={scheduleRef}>
-                                {/* 背景のタイムスロット */}
-                                <div>
-                                    {timeSlots.map((slot, idx) => (
-                                        <div
-                                            key={`slot-${idx}`}
-                                            className={`border-b transition-colors ${
-                                                hoveredSlot === idx ? 'bg-cyan-100/50' : 'border-cyan-100'
-                                            }`}
-                                            style={{ height: '58px' }}
-                                        />
-                                    ))}
+                        {/* タイムテーブル */}
+                        <div className="bg-white rounded-2xl shadow border border-cyan-200 overflow-hidden">
+                            <div className="grid" style={{ gridTemplateColumns: '64px 1fr' }}>
+                                {/* 時間ラベル列 */}
+                                <div className="border-r border-cyan-200 bg-cyan-50/50">
+                                    <div className="grid" style={{ gridTemplateRows: `repeat(${totalRows}, 58px)` }}>
+                                        {timeSlots.map((slot, idx) => (
+                                            <div
+                                                key={slot.label}
+                                                className={`px-2 sm:px-3 flex items-start ${idx % 2 === 0 ? 'border-b border-cyan-100' : ''}`}
+                                            >
+                                                <span className="text-[10px] sm:text-xs text-cyan-700 pt-2">{slot.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                {/* 予約ブロック */}
-                                <div className="absolute inset-0 p-1">
-                                    <div className="grid h-full" style={{ gridTemplateRows: `repeat(${totalRows}, 58px)` }}>
-                                        {(() => {
-                                            const groups: Booking[][] = [];
-                                            const processed = new Set<string>();
+                                {/* スケジュール列 */}
+                                <div className="relative" ref={scheduleRef}>
+                                    {/* 背景のタイムスロット */}
+                                    <div>
+                                        {timeSlots.map((slot, idx) => (
+                                            <div
+                                                key={`slot-${idx}`}
+                                                className={`border-b transition-colors ${
+                                                    hoveredSlot === idx ? 'bg-cyan-100/50' : 'border-cyan-100'
+                                                }`}
+                                                style={{ height: '58px' }}
+                                            />
+                                        ))}
+                                    </div>
 
-                                            bookings.forEach(booking => {
-                                                if (processed.has(booking.id) || booking.start.split('T')[0] !== formatYMD(currentDate)) return;
+                                    {/* 予約ブロック */}
+                                    <div className="absolute inset-0 p-1">
+                                        <div className="grid h-full" style={{ gridTemplateRows: `repeat(${totalRows}, 58px)` }}>
+                                            {(() => {
+                                                const groups: Booking[][] = [];
+                                                const processed = new Set<string>();
 
-                                                const overlapping = bookings.filter(b =>
-                                                    b.id !== booking.id &&
-                                                    !processed.has(b.id) &&
-                                                    isOverlapping(booking, b)
-                                                );
+                                                bookings.forEach(booking => {
+                                                    if (processed.has(booking.id) || booking.start.split('T')[0] !== formatYMD(currentDate)) return;
 
-                                                if (overlapping.length > 0) {
-                                                    const group = [booking, ...overlapping];
-                                                    group.forEach(b => processed.add(b.id));
-                                                    groups.push(group);
-                                                } else {
-                                                    processed.add(booking.id);
-                                                    groups.push([booking]);
-                                                }
-                                            });
+                                                    const overlapping = bookings.filter(b =>
+                                                        b.id !== booking.id &&
+                                                        !processed.has(b.id) &&
+                                                        isOverlapping(booking, b)
+                                                    );
 
-                                            return groups.map((groupBookings, groupIndex) => {
-                                                const placements = groupBookings.map(b => {
-                                                    const { startRow, spanRows } = getBookingGridPlacement(b);
-                                                    return { booking: b, startRow, spanRows, endRow: startRow + spanRows };
+                                                    if (overlapping.length > 0) {
+                                                        const group = [booking, ...overlapping];
+                                                        group.forEach(b => processed.add(b.id));
+                                                        groups.push(group);
+                                                    } else {
+                                                        processed.add(booking.id);
+                                                        groups.push([booking]);
+                                                    }
                                                 });
-                                                const minStartRow = Math.min(...placements.map(p => p.startRow));
-                                                const maxEndRow = Math.max(...placements.map(p => p.endRow));
-                                                const groupSpan = Math.max(1, maxEndRow - minStartRow);
-                                                const columnCount = placements.length;
 
-                                                return (
-                                                    <div
-                                                        key={`group-${groupIndex}`}
-                                                        style={{ gridRow: `${minStartRow} / span ${groupSpan}` }}
-                                                        className="grid gap-1"
-                                                    >
+                                                return groups.map((groupBookings, groupIndex) => {
+                                                    const placements = groupBookings.map(b => {
+                                                        const { startRow, spanRows } = getBookingGridPlacement(b);
+                                                        return { booking: b, startRow, spanRows, endRow: startRow + spanRows };
+                                                    });
+                                                    const minStartRow = Math.min(...placements.map(p => p.startRow));
+                                                    const maxEndRow = Math.max(...placements.map(p => p.endRow));
+                                                    const groupSpan = Math.max(1, maxEndRow - minStartRow);
+                                                    const columnCount = placements.length;
+
+                                                    return (
                                                         <div
-                                                            className="grid"
-                                                            style={{
-                                                                gridTemplateRows: `repeat(${groupSpan}, 54px)`,
-                                                                gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
-                                                                gap: '4px',
-                                                            }}
+                                                            key={`group-${groupIndex}`}
+                                                            style={{ gridRow: `${minStartRow} / span ${groupSpan}` }}
+                                                            className="grid gap-1"
                                                         >
-                                                            {placements.map((p, colIndex) => {
-                                                                const relativeStart = (p.startRow - minStartRow) + 1;
-                                                                const isBeingDragged = draggedBooking?.id === p.booking.id;
-                                                                
-                                                                return (
-                                                                    <div
-                                                                        key={p.booking.id}
-                                                                        className={`rounded-xl shadow-md text-white text-[11px] sm:text-sm p-2 sm:p-3 overflow-hidden cursor-grab active:cursor-grabbing select-none transition-opacity ${
-                                                                            isBeingDragged ? 'opacity-30' : 'opacity-95'
-                                                                        }`}
-                                                                        style={{
-                                                                            gridRow: `${relativeStart} / span ${p.spanRows}`,
-                                                                            gridColumn: `${colIndex + 1} / span 1`,
-                                                                            backgroundColor: p.booking.color || '#06b6d4',
-                                                                        }}
-                                                                        onMouseDown={(e) => {
-                                                                            setDidDrag(false);
-                                                                            handleMouseDown(e, p.booking)
-                                                                        }}
-                                                                    >
-                                                                        <div className="font-semibold truncate">{p.booking.title}</div>
-                                                                        <div className="text-white/90 text-[10px] sm:text-xs">
-                                                                            {new Date(p.booking.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                            {' - '}
-                                                                            {new Date(p.booking.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            <div
+                                                                className="grid"
+                                                                style={{
+                                                                    gridTemplateRows: `repeat(${groupSpan}, 54px)`,
+                                                                    gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
+                                                                    gap: '4px',
+                                                                }}
+                                                            >
+                                                                {placements.map((p, colIndex) => {
+                                                                    const relativeStart = (p.startRow - minStartRow) + 1;
+                                                                    const isBeingDragged = draggedBooking?.id === p.booking.id;
+                                                                    
+                                                                    return (
+                                                                        <div
+                                                                            key={p.booking.id}
+                                                                            className={`rounded-xl shadow-md text-white text-[11px] sm:text-sm p-2 sm:p-3 overflow-hidden cursor-grab active:cursor-grabbing select-none transition-opacity ${
+                                                                                isBeingDragged ? 'opacity-30' : 'opacity-95'
+                                                                            }`}
+                                                                            style={{
+                                                                                gridRow: `${relativeStart} / span ${p.spanRows}`,
+                                                                                gridColumn: `${colIndex + 1} / span 1`,
+                                                                                backgroundColor: p.booking.color || '#06b6d4',
+                                                                            }}
+                                                                            onMouseDown={(e) => {
+                                                                                setDidDrag(false);
+                                                                                handleMouseDown(e, p.booking)
+                                                                            }}
+                                                                        >
+                                                                            <div className="font-semibold truncate">{p.booking.title}</div>
+                                                                            <div className="text-white/90 text-[10px] sm:text-xs">
+                                                                                {new Date(p.booking.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                                {' - '}
+                                                                                {new Date(p.booking.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                );
-                                                            })}
+                                                                    );
+                                                                })}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                );
-                                            });
-                                        })()}
+                                                    );
+                                                });
+                                            })()}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* ドラッグ中のプレビュー */}
-                {isDragging && draggedBooking && didDrag && (
-                    <div
-                        className="fixed pointer-events-none z-50 rounded-xl shadow-2xl text-white text-sm p-3 opacity-80"
-                        style={{
-                            left: mousePos.x - dragOffset.x,
-                            top: mousePos.y - dragOffset.y,
-                            backgroundColor: draggedBooking.color || '#06b6d4',
-                            width: '200px',
+                    {/* ドラッグ中のプレビュー */}
+                    {isDragging && draggedBooking && didDrag && (
+                        <div
+                            className="fixed pointer-events-none z-50 rounded-xl shadow-2xl text-white text-sm p-3 opacity-80"
+                            style={{
+                                left: mousePos.x - dragOffset.x,
+                                top: mousePos.y - dragOffset.y,
+                                backgroundColor: draggedBooking.color || '#06b6d4',
+                                width: '200px',
+                            }}
+                        >
+                            <div className="font-semibold truncate">{draggedBooking.title}</div>
+                            <div className="text-white/90 text-xs">
+                                {new Date(draggedBooking.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                {' - '}
+                                {new Date(draggedBooking.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                        </div>
+                    )}
+
+
+                    {/* 予約詳細画面作成 */}
+                    {selectedBooking && (
+                        <div
+                        // 1. オーバーレイ (背景)
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                        // オーバーレイクリックで閉じる
+                        onClick={() => {
+                            // setIsDetailModalOpen(false);
+                            setSelectedBooking(null);
                         }}
                     >
-                        <div className="font-semibold truncate">{draggedBooking.title}</div>
-                        <div className="text-white/90 text-xs">
-                            {new Date(draggedBooking.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            {' - '}
-                            {new Date(draggedBooking.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                    </div>
-                )}
-
-
-                {/* 予約詳細画面作成 */}
-                {selectedBooking && (
-                    <div
-                    // 1. オーバーレイ (背景)
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-                    // オーバーレイクリックで閉じる
-                    onClick={() => {
-                        // setIsDetailModalOpen(false);
-                        setSelectedBooking(null);
-                    }}
-                >
-                    {/* 2. モーダルパネル (コンテンツ本体) */}
-                    <div
-                        // モーダル内部のクリックが、背景のonClickに伝播(バブリング)するのを防ぐ
-                        onClick={(e) => e.stopPropagation()} 
-                        // モーダルのスタイル (白背景、角丸、影、サイズ)
-                        className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 text-gray-900"
-                    >
-                        {/* --- ヘッダー --- */}
-                        <div className="flex justify-between items-center p-4 border-b border-gray-200">
-                            <h3 className="text-lg font-semibold">
-                                予約詳細
-                            </h3>
-                            <button
-                                onClick={() => {
-                                    // setIsDetailModalOpen(false);
-                                    setSelectedBooking(null);
-                                }}
-                                className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
-                            >
-                                {/* Xボタン (Heroiconsより) */}
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-            
-                        {/* --- ボディ --- */}
-                        <div className="p-6 space-y-4">
-                            {/* 予約タイトル */}
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-500">タイトル</h4>
-                                <p className="text-lg">{selectedBooking.title || '（タイトルなし）'}</p>
-                            </div>
-                            
-                            {/* 日時 */}
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-500">日時</h4>
-                                <p className="text-lg">
-                                    <select value={new Date(selectedBooking.start).getFullYear()} onChange={(e) => handleDateChange(e,selectedBooking,'year')}>
-                                        <option value="2024">2024</option>
-                                        <option value="2025">2025</option>
-                                        <option value="2026">2026</option>
-                                    </select>
-                                    {' 年 '}
-                                    <select value={new Date(selectedBooking.start).getMonth() + 1} onChange={(e) => handleDateChange(e,selectedBooking,'month')}>
-                                        {[...Array(12)].map((_, i) => (
-                                            <option key={i + 1} value={i + 1}>{i + 1}</option>
-                                        ))}
-                                    </select>
-                                    {' 月 '}
-
-                                    <select value={new Date(selectedBooking.start).getDate()} onChange={(e) => handleDateChange(e,selectedBooking,'day')}>
-                                        {[...Array(31)].map((_, i) => (
-                                            <option key={i + 1} value={i + 1}>{i + 1}</option>
-                                        ))}
-                                    </select>
-                                    {' 日 '}
-                                </p>
-                                <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
-                                <p className="text-lg font-mono">
-                                    {/* 時間のフォーマット */}
-                                    <select value={new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleDateChange(e,selectedBooking,'time')}>
-                                        {timeOptions.map((time) => (
-                                        <option key={time} value={time}>
-                                            {time}
-                                        </option>
-                                        ))}
-                                    </select>
-                                </p>
-                                <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
-                                <p className="text-lg font-mono">
-                                    {/* 時間のフォーマット */}
-                                    <select value={selectedBooking.stretchCourse} onChange={(e) => handleCourseChange(e,selectedBooking)}>
-                                        {statusCourse.map((data) => (
-                                        <option key={data.course} value={data.value}>
-                                            {data.course}
-                                        </option>
-                                        ))}
-                                    </select>
-                                </p>
-                            </div>
-                            
-                            {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
-                            <div>
-                                <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
-                                <select 
-                                    value={selectedBooking.color}
-                                    onChange={(e) => {
-                                        handleColorStatusChange(e,selectedBooking)
-                                    }}
-                                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
-                                    {getSortedStatusOptions(selectedBooking.color!).map(opt => (
-                                        <option key={opt.color} value={opt.color}>
-                                            {opt.label}
-                                        </option>
-                                    ))}      
-                                </select>
-                            </div>
-                           
-                        </div>
-            
-                        {/* --- フッター --- */}
-                        <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                            {/* 削除ボタン (左寄せ) */}
-                            <button
-                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-gray-300 rounded-lg hover:bg-red-700"
-                                onClick={() => {
-                                    alert(`ID: ${selectedBooking.id} を削除します`);
-                                    setSelectedBooking(null);
-                                }}
-                            >
-                                削除
-                            </button>
-                            
-                            {/* 閉じる・編集ボタン (右寄せ) */}
-                            <div className="space-x-3">
+                        {/* 2. モーダルパネル (コンテンツ本体) */}
+                        <div
+                            // モーダル内部のクリックが、背景のonClickに伝播(バブリング)するのを防ぐ
+                            onClick={(e) => e.stopPropagation()} 
+                            // モーダルのスタイル (白背景、角丸、影、サイズ)
+                            className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 text-gray-900"
+                        >
+                            {/* --- ヘッダー --- */}
+                            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                                <h3 className="text-lg font-semibold">
+                                    予約詳細
+                                </h3>
                                 <button
-                                    className="px-4 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
-                                    onClick={() => changeBooking()}
-                                >
-                                    変更
-                                </button>
-                                <button
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                                     onClick={() => {
+                                        // setIsDetailModalOpen(false);
+                                        setSelectedBooking(null);
+                                    }}
+                                    className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                                >
+                                    {/* Xボタン (Heroiconsより) */}
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                
+                            {/* --- ボディ --- */}
+                            <div className="p-6 space-y-4">
+                                {/* 予約タイトル */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">タイトル</h4>
+                                    <p className="text-lg">{selectedBooking.title || '（タイトルなし）'}</p>
+                                </div>
+                                
+                                {/* 日時 */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">日時</h4>
+                                    <p className="text-lg">
+                                        <select value={new Date(selectedBooking.start).getFullYear()} onChange={(e) => handleDateChange(e,selectedBooking,'year')}>
+                                            <option value="2024">2024</option>
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                        </select>
+                                        {' 年 '}
+                                        <select value={new Date(selectedBooking.start).getMonth() + 1} onChange={(e) => handleDateChange(e,selectedBooking,'month')}>
+                                            {[...Array(12)].map((_, i) => (
+                                                <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                            ))}
+                                        </select>
+                                        {' 月 '}
+
+                                        <select value={new Date(selectedBooking.start).getDate()} onChange={(e) => handleDateChange(e,selectedBooking,'day')}>
+                                            {[...Array(31)].map((_, i) => (
+                                                <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                            ))}
+                                        </select>
+                                        {' 日 '}
+                                    </p>
+                                    <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
+                                    <p className="text-lg font-mono">
+                                        {/* 時間のフォーマット */}
+                                        <select value={new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleDateChange(e,selectedBooking,'time')}>
+                                            {timeOptions.map((time) => (
+                                            <option key={time} value={time}>
+                                                {time}
+                                            </option>
+                                            ))}
+                                        </select>
+                                    </p>
+                                    <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
+                                    <p className="text-lg font-mono">
+                                        {/* 時間のフォーマット */}
+                                        <select value={selectedBooking.stretchCourse} onChange={(e) => handleCourseChange(e,selectedBooking)}>
+                                            {statusCourse.map((data) => (
+                                            <option key={data.course} value={data.value}>
+                                                {data.course}
+                                            </option>
+                                            ))}
+                                        </select>
+                                    </p>
+                                </div>
+                                
+                                {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
+                                    <select 
+                                        value={selectedBooking.color}
+                                        onChange={(e) => {
+                                            handleColorStatusChange(e,selectedBooking)
+                                        }}
+                                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                        {getSortedStatusOptions(selectedBooking.color!).map(opt => (
+                                            <option key={opt.color} value={opt.color}>
+                                                {opt.label}
+                                            </option>
+                                        ))}      
+                                    </select>
+                                </div>
+                            
+                            </div>
+                
+                            {/* --- フッター --- */}
+                            <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                                {/* 削除ボタン (左寄せ) */}
+                                <button
+                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-gray-300 rounded-lg hover:bg-red-700"
+                                    onClick={() => {
+                                        alert(`ID: ${selectedBooking.id} を削除します`);
                                         setSelectedBooking(null);
                                     }}
                                 >
-                                    閉じる
+                                    削除
                                 </button>
+                                
+                                {/* 閉じる・編集ボタン (右寄せ) */}
+                                <div className="space-x-3">
+                                    <button
+                                        className="px-4 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
+                                        onClick={() => changeBooking()}
+                                    >
+                                        変更
+                                    </button>
+                                    <button
+                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                                        onClick={() => {
+                                            setSelectedBooking(null);
+                                        }}
+                                    >
+                                        閉じる
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    )}    
                 </div>
-                )}    
             </div>
         </div>
     );
