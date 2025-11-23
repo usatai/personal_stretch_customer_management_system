@@ -61,7 +61,6 @@ export default function BookingsWithDragDrop() {
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [didDrag, setDidDrag] = useState(false);
     const [clientData, setClientData] = useState<CalendarEvent[]>([]);
-    
     const scheduleRef = useRef<HTMLDivElement>(null);
 
     const startHour = 9;
@@ -69,32 +68,32 @@ export default function BookingsWithDragDrop() {
     const timeSlots = useMemo(() => generateTimeSlots(startHour, endHour), [startHour, endHour]);
     const totalRows = useMemo(() => (endHour - startHour) * 2 + 1, [startHour, endHour]);
 
+    const fetchBookings = async () => {
+        try {
+            const response = await apiClient("/bookings");
+            if (response.ok) {
+                let responseData = await response.json();
+                const bookingList: BackendBooking[] = responseData.bookingList;
+                const calendarEvents = convertToCalendarEvents(bookingList);
+                console.log(calendarEvents);
+                setClientData(calendarEvents);                 
+            } else {
+                if (response.status === 401) {
+                    const errorData = await response.json();
+                    alert(errorData.failLogin || "ユーザー名またはパスワードが正しくありません。");
+                } else {
+
+                }
+            }
+        } catch (e) {
+            console.error("エラー" + e)
+        }
+    }
 
     useEffect(() => {
-        const fetchBookings = async () => {
-            try {
-                const response = await apiClient("/bookings");
-                if (response.ok) {
-                    let responseData = await response.json();
-                    const bookingList: BackendBooking[] = responseData.bookingList;
-                    const calendarEvents = convertToCalendarEvents(bookingList);
-                    console.log(calendarEvents);
-                    setClientData(calendarEvents);                 
-                } else {
-                    if (response.status === 401) {
-                        const errorData = await response.json();
-                        alert(errorData.failLogin || "ユーザー名またはパスワードが正しくありません。");
-                    } else {
-    
-                    }
-                }
-            } catch (e) {
-                console.error("エラー" + e)
-            }
-        }
 
         fetchBookings();
-        
+
     }, [currentDate]);
 
     const bookings = bookingsState.length > 0 ? bookingsState : clientData;
@@ -252,21 +251,48 @@ export default function BookingsWithDragDrop() {
     
     const timeOptions = generateTimeOptions();
 
-      // selectが変わった時のハンドラ
-    const handleStartChange = (e: React.ChangeEvent<HTMLSelectElement>,booking : Booking) => {
-        const [hours, minutes] = e.target.value.split(':').map(Number);
-        const newStart = new Date(booking.start);
-        newStart.setHours(hours, minutes);
-        if (!selectedBooking) return;
-        setSelectedBooking({ ...selectedBooking, start: newStart.toISOString() });
-    };
+    // selectが変わった時のハンドラ
+    // BookingsWithDragDrop コンポーネント内
 
-    const handleEndChange = (e: React.ChangeEvent<HTMLSelectElement>,booking : Booking) => {
-        const [hours, minutes] = e.target.value.split(':').map(Number);
-        const newEnd = new Date(booking.end);
-        newEnd.setHours(hours, minutes);
+    const handleDateChange = (e: React.ChangeEvent<HTMLSelectElement>, booking: Booking, part: string) => {
         if (!selectedBooking) return;
-        setSelectedBooking({ ...selectedBooking, end: newEnd.toISOString() });
+        
+        // 現在の開始日時をDateオブジェクトとして取得
+        const currentStart = new Date(selectedBooking.start);
+        let newStart = new Date(currentStart);
+        
+        const newValue = Number(e.target.value);
+
+        // 1. Dateオブジェクト内の日時を設定
+        if (part === 'year') {
+            newStart.setFullYear(newValue);
+        } else if (part === 'month') {
+            newStart.setMonth(newValue - 1);
+        } else if (part === 'day') {
+            newStart.setDate(newValue);
+        } else if (part === 'time') {
+            const [hours, minutes] = e.target.value.split(':').map(Number);
+            // 時と分をローカル時刻として設定
+            newStart.setHours(hours, minutes, 0, 0); 
+        }
+        // 2. ローカル時刻を保ったまま、ZなしのISO形式の文字列に変換
+
+        // Dateオブジェクトから各要素を取得し、2桁にパディング
+        const year = newStart.getFullYear();
+        const month = String(newStart.getMonth() + 1).padStart(2, '0');
+        const day = String(newStart.getDate()).padStart(2, '0');
+        const hour = String(newStart.getHours()).padStart(2, '0');
+        const minute = String(newStart.getMinutes()).padStart(2, '0');
+        const second = '00'; // 秒は固定で00
+        
+        // YYYY-MM-DDTHH:MM:SS 形式の文字列を作成
+        const localIsoString = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+        
+        // 3. selectedBooking State を更新
+        setSelectedBooking({ 
+            ...selectedBooking, 
+            start: localIsoString
+        });
     };
 
     const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>, booking: Booking) => {
@@ -274,8 +300,14 @@ export default function BookingsWithDragDrop() {
         setSelectedBooking({ ...selectedBooking, stretchCourse: Number(e.target.value) });
     };
 
+    const handleColorStatusChange = (e: React.ChangeEvent<HTMLSelectElement>, booking: Booking) => {
+        if (!selectedBooking) return;
+        setSelectedBooking({ ...selectedBooking, color: e.target.value });
+    };
+
     // 顧客詳細情報変更ボタン
     const changeBooking = async () => {
+        console.log(selectedBooking);
         const numericId = Number(selectedBooking?.id.replace('b', ''));
         // IDが変換できない（数値以外が含まれるなど）場合はエラーチェックを入れるとより安全です。
         if (isNaN(numericId)) {
@@ -283,22 +315,24 @@ export default function BookingsWithDragDrop() {
         }
 
         const response = await apiClient("/detailBooking",{
-            method: "PATCH",
+            method: "PUT",
             body: JSON.stringify({
                 id: numericId,
                 start: selectedBooking?.start,
-                end: selectedBooking?.end,
+                stretchCourse: selectedBooking?.stretchCourse,
                 color: selectedBooking?.color
             })
         });
 
         if (response.ok) {
             console.log("更新成功");
+            await fetchBookings();
         } else {
             console.error("更新失敗");
         }
 
         setSelectedBooking(null);
+
     }
 
     return (
@@ -576,20 +610,20 @@ export default function BookingsWithDragDrop() {
                             <div>
                                 <h4 className="text-sm font-medium text-gray-500">日時</h4>
                                 <p className="text-lg">
-                                    <select value={new Date(selectedBooking.start).getFullYear()} onChange={(e) => handleStartChange(e,selectedBooking)}>
+                                    <select value={new Date(selectedBooking.start).getFullYear()} onChange={(e) => handleDateChange(e,selectedBooking,'year')}>
                                         <option value="2024">2024</option>
                                         <option value="2025">2025</option>
                                         <option value="2026">2026</option>
                                     </select>
                                     {' 年 '}
-                                    <select value={new Date(selectedBooking.start).getMonth() + 1} onChange={(e) => handleEndChange(e,selectedBooking)}>
+                                    <select value={new Date(selectedBooking.start).getMonth() + 1} onChange={(e) => handleDateChange(e,selectedBooking,'month')}>
                                         {[...Array(12)].map((_, i) => (
                                             <option key={i + 1} value={i + 1}>{i + 1}</option>
                                         ))}
                                     </select>
                                     {' 月 '}
 
-                                    <select value={new Date(selectedBooking.start).getDate()} onChange={(e) => handleEndChange(e,selectedBooking)}>
+                                    <select value={new Date(selectedBooking.start).getDate()} onChange={(e) => handleDateChange(e,selectedBooking,'day')}>
                                         {[...Array(31)].map((_, i) => (
                                             <option key={i + 1} value={i + 1}>{i + 1}</option>
                                         ))}
@@ -599,7 +633,7 @@ export default function BookingsWithDragDrop() {
                                 <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
                                 <p className="text-lg font-mono">
                                     {/* 時間のフォーマット */}
-                                    <select value={new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleStartChange(e,selectedBooking)}>
+                                    <select value={new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleDateChange(e,selectedBooking,'time')}>
                                         {timeOptions.map((time) => (
                                         <option key={time} value={time}>
                                             {time}
@@ -623,7 +657,12 @@ export default function BookingsWithDragDrop() {
                             {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
                             <div>
                                 <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
-                                <select className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                <select 
+                                    value={selectedBooking.color}
+                                    onChange={(e) => {
+                                        handleColorStatusChange(e,selectedBooking)
+                                    }}
+                                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
                                     {getSortedStatusOptions(selectedBooking.color!).map(opt => (
                                         <option key={opt.color} value={opt.color}>
                                             {opt.label}
