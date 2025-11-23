@@ -61,6 +61,7 @@ export default function BookingsWithDragDrop() {
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [didDrag, setDidDrag] = useState(false);
     const [clientData, setClientData] = useState<CalendarEvent[]>([]);
+    const [bookingRegister, setBookingRegister] = useState<boolean>(false);
     const scheduleRef = useRef<HTMLDivElement>(null);
 
     const startHour = 9;
@@ -217,6 +218,7 @@ export default function BookingsWithDragDrop() {
                 }
             }
         } else {
+            setBookingRegister(false);
             setSelectedBooking(draggedBooking); // 表示する予約データをセット
         }
     
@@ -344,7 +346,10 @@ export default function BookingsWithDragDrop() {
         }
 
         setSelectedBooking(null);
+    }
 
+    const handleBookingRegister = () => {
+        setBookingRegister(true);
     }
 
     return (
@@ -423,7 +428,7 @@ export default function BookingsWithDragDrop() {
                                         <span className="inline-block w-3 h-3 rounded-sm bg-[#f59e0b]" /> 仮予約
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="inline-block w-3 h-3 rounded-sm bg-[#ef4444]" /> キャンセル待ち
+                                        <span className="inline-block w-3 h-3 rounded-sm bg-[#ef4444]" /> キャンセル
                                     </div>
                                 </div>
                             </div>
@@ -447,7 +452,7 @@ export default function BookingsWithDragDrop() {
                                 </div>
 
                                 {/* スケジュール列 */}
-                                <div className="relative" ref={scheduleRef}>
+                                <div className="relative" ref={scheduleRef} onClick={handleBookingRegister}>
                                     {/* 背景のタイムスロット */}
                                     <div>
                                         {timeSlots.map((slot, idx) => (
@@ -526,6 +531,9 @@ export default function BookingsWithDragDrop() {
                                                                                 gridColumn: `${colIndex + 1} / span 1`,
                                                                                 backgroundColor: p.booking.color || '#06b6d4',
                                                                             }}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                            }}
                                                                             onMouseDown={(e) => {
                                                                                 setDidDrag(false);
                                                                                 handleMouseDown(e, p.booking)
@@ -572,144 +580,286 @@ export default function BookingsWithDragDrop() {
                         </div>
                     )}
 
-
                     {/* 予約詳細画面作成 */}
                     {selectedBooking && (
                         <div
-                        // 1. オーバーレイ (背景)
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-                        // オーバーレイクリックで閉じる
-                        onClick={() => {
-                            // setIsDetailModalOpen(false);
-                            setSelectedBooking(null);
-                        }}
-                    >
-                        {/* 2. モーダルパネル (コンテンツ本体) */}
-                        <div
-                            // モーダル内部のクリックが、背景のonClickに伝播(バブリング)するのを防ぐ
-                            onClick={(e) => e.stopPropagation()} 
-                            // モーダルのスタイル (白背景、角丸、影、サイズ)
-                            className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 text-gray-900"
+                            // 1. オーバーレイ (背景)
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                            // オーバーレイクリックで閉じる
+                            onClick={() => {
+                                // setIsDetailModalOpen(false);
+                                setSelectedBooking(null);
+                            }}
                         >
-                            {/* --- ヘッダー --- */}
-                            <div className="flex justify-between items-center p-4 border-b border-gray-200">
-                                <h3 className="text-lg font-semibold">
-                                    予約詳細
-                                </h3>
-                                <button
-                                    onClick={() => {
-                                        // setIsDetailModalOpen(false);
-                                        setSelectedBooking(null);
-                                    }}
-                                    className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
-                                >
-                                    {/* Xボタン (Heroiconsより) */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                
-                            {/* --- ボディ --- */}
-                            <div className="p-6 space-y-4">
-                                {/* 予約タイトル */}
-                                <div>
-                                    <h4 className="text-sm font-medium text-gray-500">タイトル</h4>
-                                    <p className="text-lg">{selectedBooking.title || '（タイトルなし）'}</p>
-                                </div>
-                                
-                                {/* 日時 */}
-                                <div>
-                                    <h4 className="text-sm font-medium text-gray-500">日時</h4>
-                                    <p className="text-lg">
-                                        <select value={new Date(selectedBooking.start).getFullYear()} onChange={(e) => handleDateChange(e,selectedBooking,'year')}>
-                                            <option value="2024">2024</option>
-                                            <option value="2025">2025</option>
-                                            <option value="2026">2026</option>
-                                        </select>
-                                        {' 年 '}
-                                        <select value={new Date(selectedBooking.start).getMonth() + 1} onChange={(e) => handleDateChange(e,selectedBooking,'month')}>
-                                            {[...Array(12)].map((_, i) => (
-                                                <option key={i + 1} value={i + 1}>{i + 1}</option>
-                                            ))}
-                                        </select>
-                                        {' 月 '}
-
-                                        <select value={new Date(selectedBooking.start).getDate()} onChange={(e) => handleDateChange(e,selectedBooking,'day')}>
-                                            {[...Array(31)].map((_, i) => (
-                                                <option key={i + 1} value={i + 1}>{i + 1}</option>
-                                            ))}
-                                        </select>
-                                        {' 日 '}
-                                    </p>
-                                    <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
-                                    <p className="text-lg font-mono">
-                                        {/* 時間のフォーマット */}
-                                        <select value={new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleDateChange(e,selectedBooking,'time')}>
-                                            {timeOptions.map((time) => (
-                                            <option key={time} value={time}>
-                                                {time}
-                                            </option>
-                                            ))}
-                                        </select>
-                                    </p>
-                                    <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
-                                    <p className="text-lg font-mono">
-                                        {/* 時間のフォーマット */}
-                                        <select value={selectedBooking.stretchCourse} onChange={(e) => handleCourseChange(e,selectedBooking)}>
-                                            {statusCourse.map((data) => (
-                                            <option key={data.course} value={data.value}>
-                                                {data.course}
-                                            </option>
-                                            ))}
-                                        </select>
-                                    </p>
-                                </div>
-                                
-                                {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
-                                <div>
-                                    <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
-                                    <select 
-                                        value={selectedBooking.color}
-                                        onChange={(e) => {
-                                            handleColorStatusChange(e,selectedBooking)
-                                        }}
-                                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
-                                        {getSortedStatusOptions(selectedBooking.color!).map(opt => (
-                                            <option key={opt.color} value={opt.color}>
-                                                {opt.label}
-                                            </option>
-                                        ))}      
-                                    </select>
-                                </div>
-                            
-                            </div>
-                
-                            {/* --- フッター --- */}
-                            <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                                {/* 削除ボタン (左寄せ) */}
-                                <button
-                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-gray-300 rounded-lg hover:bg-red-700"
-                                    onClick={() => {
-                                        alert(`ID: ${selectedBooking.id} を削除します`);
-                                        setSelectedBooking(null);
-                                    }}
-                                >
-                                    削除
-                                </button>
-                                
-                                {/* 閉じる・編集ボタン (右寄せ) */}
-                                <div className="space-x-3">
+                            {/* 2. モーダルパネル (コンテンツ本体) */}
+                            <div
+                                // モーダル内部のクリックが、背景のonClickに伝播(バブリング)するのを防ぐ
+                                onClick={(e) => e.stopPropagation()} 
+                                // モーダルのスタイル (白背景、角丸、影、サイズ)
+                                className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 text-gray-900"
+                            >
+                                {/* --- ヘッダー --- */}
+                                <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                                    <h3 className="text-lg font-semibold">
+                                        予約詳細
+                                    </h3>
                                     <button
-                                        className="px-4 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
+                                        onClick={() => {
+                                            // setIsDetailModalOpen(false);
+                                            setSelectedBooking(null);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                                    >
+                                        {/* Xボタン (Heroiconsより) */}
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                    
+                                {/* --- ボディ --- */}
+                                <div className="p-6 space-y-4">
+                                    {/* 予約タイトル */}
+                                    <div>
+                                        <h4 className="text-sm font-medium text-gray-500">タイトル</h4>
+                                        <p className="text-lg">{selectedBooking.title || '（タイトルなし）'}</p>
+                                    </div>
+                                    
+                                    {/* 日時 */}
+                                    <div>
+                                        <h4 className="text-sm font-medium text-gray-500">日時</h4>
+                                        <p className="text-lg">
+                                            <select 
+                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150"
+                                                value={new Date(selectedBooking.start).getFullYear()} onChange={(e) => handleDateChange(e,selectedBooking,'year')}>
+                                                <option value="2024">2024</option>
+                                                <option value="2025">2025</option>
+                                                <option value="2026">2026</option>
+                                            </select>
+                                            {' 年 '}
+                                            <select
+                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150" 
+                                                value={new Date(selectedBooking.start).getMonth() + 1} onChange={(e) => handleDateChange(e,selectedBooking,'month')}>
+                                                {[...Array(12)].map((_, i) => (
+                                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                                ))}
+                                            </select>
+                                            {' 月 '}
+
+                                            <select
+                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150" 
+                                                value={new Date(selectedBooking.start).getDate()} onChange={(e) => handleDateChange(e,selectedBooking,'day')}>
+                                                {[...Array(31)].map((_, i) => (
+                                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                                ))}
+                                            </select>
+                                            {' 日 '}
+                                        </p>
+                                        <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
+                                        <p className="text-lg font-mono">
+                                            {/* 時間のフォーマット */}
+                                            <select
+                                                className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150" 
+                                                value={new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleDateChange(e,selectedBooking,'time')}>
+                                                {timeOptions.map((time) => (
+                                                <option key={time} value={time}>
+                                                    {time}
+                                                </option>
+                                                ))}
+                                            </select>
+                                        </p>
+                                        <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
+                                        <p className="text-lg font-mono">
+                                            {/* 時間のフォーマット */}
+                                            <select
+                                                className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150" 
+                                                value={selectedBooking.stretchCourse} onChange={(e) => handleCourseChange(e,selectedBooking)}>
+                                                {statusCourse.map((data) => (
+                                                <option key={data.course} value={data.value}>
+                                                    {data.course}
+                                                </option>
+                                                ))}
+                                            </select>
+                                        </p>
+                                    </div>
+                                    
+                                    {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
+                                    <div>
+                                        <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
+                                        <select 
+                                            value={selectedBooking.color}
+                                            onChange={(e) => {
+                                                handleColorStatusChange(e,selectedBooking)
+                                            }}
+                                            className="w-75 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                            {getSortedStatusOptions(selectedBooking.color!).map(opt => (
+                                                <option key={opt.color} value={opt.color}>
+                                                    {opt.label}
+                                                </option>
+                                            ))}      
+                                        </select>
+                                    </div>
+                                
+                                </div>
+                    
+                                {/* --- フッター --- */}
+                                <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                                    {/* 削除ボタン (左寄せ) */}
+                                    <button
+                                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-gray-300 rounded-lg hover:bg-red-700"
+                                        onClick={() => {
+                                            alert(`ID: ${selectedBooking.id} を削除します`);
+                                            setSelectedBooking(null);
+                                        }}
+                                    >
+                                        削除
+                                    </button>
+                                    
+                                    {/* 閉じる・編集ボタン (右寄せ) */}
+                                    <div className="space-x-3">
+                                        <button
+                                            className="px-4 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
+                                            onClick={() => changeBooking()}
+                                        >
+                                            変更
+                                        </button>
+                                        <button
+                                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                                            onClick={() => {
+                                                setSelectedBooking(null);
+                                            }}
+                                        >
+                                            閉じる
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {bookingRegister && (
+                        <div 
+                            // 1. オーバーレイ (背景)
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                            // オーバーレイクリックで閉じる
+                            onClick={() => {
+                                // setIsDetailModalOpen(false);
+                                setBookingRegister(false);
+                            }}
+                        >
+                             <div
+                                // モーダル内部のクリックが、背景のonClickに伝播(バブリング)するのを防ぐ
+                                onClick={(e) => e.stopPropagation()} 
+                                // モーダルのスタイル (白背景、角丸、影、サイズ)
+                                className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 text-gray-900"
+                            >
+                                {/* --- ヘッダー --- */}
+                                <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                                    <h3 className="text-lg font-semibold">
+                                        予約登録
+                                    </h3>
+                                    <button
+                                        onClick={() => {
+                                            // setIsDetailModalOpen(false);
+                                            setBookingRegister(false);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                                    >
+                                        {/* Xボタン (Heroiconsより) */}
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                {/* --- ボディ --- */}
+                                <div className="p-6 space-y-4">
+                                    <div>
+                                        <h4 className="text-sm font-medium text-gray-500">名前</h4>
+                                        <input 
+                                            type="text" 
+                                            className="px-1 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150"
+                                        >
+                                            
+                                        </input>
+                                    </div>
+                                     {/* 日時 */}
+                                     <div>
+                                        <h4 className="text-sm font-medium text-gray-500">日時</h4>
+                                        <p className="text-lg">
+                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                                <option value="2024">2024</option>
+                                                <option value="2025">2025</option>
+                                                <option value="2026">2026</option>
+                                            </select>
+                                            {' 年 '}
+                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                                {[...Array(12)].map((_, i) => (
+                                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                                ))}
+                                            </select>
+                                            {' 月 '}
+
+                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                                {[...Array(31)].map((_, i) => (
+                                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                                ))}
+                                            </select>
+                                            {' 日 '}
+                                        </p>
+                                        <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
+                                        <p className="text-lg font-mono">
+                                           {/* 時間のフォーマット */}
+                                           <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                                {timeOptions.map((time) => (
+                                                <option key={time} value={time}>
+                                                    {time}
+                                                </option>
+                                                ))}
+                                            </select>
+                                            
+                                        </p>
+                                        <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
+                                        <p className="text-lg font-mono">
+                                            <select className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                                {statusCourse.map((data) => (
+                                                <option key={data.course} value={data.value}>
+                                                    {data.course}
+                                                </option>
+                                                ))}
+                                            </select>
+                                        </p>
+                                    </div>
+                                    
+                                    {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
+                                    <div>
+                                        <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
+                                        <select 
+                                            className="w-75 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                           
+                                              
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-sm font-medium text-gray-500">メモ</h4>
+                                        <textarea className="w-full px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150"></textarea>
+                                        
+                                    </div>
+                                
+                                </div>
+                                {/* --- フッター --- */}
+                                <div className="flex items-center justify-end p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">         
+                                    <button
+                                        className="px-4 py-2 mr-3 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
                                         onClick={() => changeBooking()}
                                     >
-                                        変更
+                                        登録
                                     </button>
                                     <button
                                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                                         onClick={() => {
-                                            setSelectedBooking(null);
+                                            setBookingRegister(false);
                                         }}
                                     >
                                         閉じる
@@ -717,8 +867,8 @@ export default function BookingsWithDragDrop() {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    )}    
+                             
+                    )}
                 </div>
             </div>
         </div>
