@@ -776,31 +776,30 @@ export default function BookingsWithDragDrop() {
                                 <div className="p-6 space-y-4">
                                     <div>
                                         <h4 className="text-sm font-medium text-gray-500">名前</h4>
-                                        <input 
-                                            type="text" 
-                                            className="px-1 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150"
+                                        <input
+                                            type="text"
+                                            className="pl-3 pr-4 py-3 bg-white border border-gray-300 text-medium rounded-xl w-75 focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all text-gray-900 placeholder:text-gray-400" 
                                         >
-
                                         </input>
                                     </div>
                                      {/* 日時 */}
                                      <div>
                                         <h4 className="text-sm font-medium text-gray-500">日時</h4>
                                         <p className="text-lg">
-                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
                                                 <option value="2024">2024</option>
                                                 <option value="2025">2025</option>
                                                 <option value="2026">2026</option>
                                             </select>
                                             {' 年 '}
-                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
                                                 {[...Array(12)].map((_, i) => (
                                                     <option key={i + 1} value={i + 1}>{i + 1}</option>
                                                 ))}
                                             </select>
                                             {' 月 '}
 
-                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
                                                 {[...Array(31)].map((_, i) => (
                                                     <option key={i + 1} value={i + 1}>{i + 1}</option>
                                                 ))}
@@ -810,7 +809,7 @@ export default function BookingsWithDragDrop() {
                                         <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
                                         <p className="text-lg font-mono">
                                            {/* 時間のフォーマット */}
-                                           <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                           <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-allduration-150">
                                                 {timeOptions.map((time) => (
                                                 <option key={time} value={time}>
                                                     {time}
@@ -821,7 +820,7 @@ export default function BookingsWithDragDrop() {
                                         </p>
                                         <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
                                         <p className="text-lg font-mono">
-                                            <select className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                            <select className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
                                                 {statusCourse.map((data) => (
                                                 <option key={data.course} value={data.value}>
                                                     {data.course}
@@ -835,15 +834,16 @@ export default function BookingsWithDragDrop() {
                                     <div>
                                         <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
                                         <select 
-                                            className="w-75 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
-                                           
-                                              
+                                            className="w-75 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
+                                           {statusOptions.map((data) => (
+                                                <option key={data.color}>{data.label}</option>
+                                           ))}
                                         </select>
                                     </div>
 
                                     <div>
                                         <h4 className="text-sm font-medium text-gray-500">メモ</h4>
-                                        <textarea className="w-full px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150"></textarea>
+                                        <textarea className="w-full px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150"></textarea>
                                         
                                     </div>
                                 

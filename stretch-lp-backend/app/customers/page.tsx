@@ -140,8 +140,7 @@ export default function Customers () {
                 const responseData = await response.json();
                 const usersData: Users[] = responseData.bookingUsers;
                 setBookingUser(usersData);
-                // console.log(bookingUsers);
-                // return bookingUsers;
+                
             } else {
                 console.error("データ取得失敗");
                 alert("データの取得に失敗しました。");
