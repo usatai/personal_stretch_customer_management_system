@@ -1,7 +1,8 @@
 'use client'
 
 import Sidebar from "@/component/Sidebar";
-import { useMemo, useState } from "react";
+import { apiClient } from "@/utils/apiClient";
+import { useEffect, useMemo, useState } from "react";
 
 type Customer = {
     id: string;
@@ -16,6 +17,16 @@ type Customer = {
     notes?: string;
 }
 
+type Users = {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    lastVisitDate: string; // YYYY-MM-DD
+    visitCount: number;
+    message?: string;
+}
+
 export default function Customers () {
     const [sidebarOpen,setSidebarOpen] = useState<boolean>(false);
     const [searchQuery,setSearchQuery] = useState<string>("");
@@ -23,6 +34,7 @@ export default function Customers () {
     const [filterVisitCount, setFilterVisitCount] = useState<string>('all'); 
     const [sortBy, setSortBy] = useState<string>('lastVisit'); 
     const [customerId,setCustomerId] = useState<string | null>("");
+    const [bookingUsers, setBookingUser] = useState<Users[]>([]);
 
     const demoCustomers: Customer[] = useMemo(() => [
         {
@@ -120,14 +132,38 @@ export default function Customers () {
         }
     ], []);
 
+    const getBookingUser = async () => {
+        try {
+            const response = await apiClient("/users");
+            if (response.ok) {
+                console.log("データ取得成功");
+                const responseData = await response.json();
+                const usersData: Users[] = responseData.bookingUsers;
+                setBookingUser(usersData);
+                // console.log(bookingUsers);
+                // return bookingUsers;
+            } else {
+                console.error("データ取得失敗");
+                alert("データの取得に失敗しました。");
+            }
+
+        } catch (e) {
+            console.error("ユーザーデータ取得失敗" + e);
+        }
+    }
+
+    useEffect(() => {
+        getBookingUser();
+    },[])
+
     const filteredAndSortedCustomers = useMemo(() => {
-        let filtered = [...demoCustomers];
+        let filtered = [...bookingUsers];
 
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             filtered = filtered.filter(customer => 
                 customer.name.toLowerCase().includes(query) ||
-                customer.nameKana.toLowerCase().includes(query) ||
+                // customer.nameKana.toLowerCase().includes(query) ||
                 customer.email.toLowerCase().includes(query) ||
                 customer.phone.includes(query)
             );
@@ -185,7 +221,7 @@ export default function Customers () {
             }
         });
         return filtered;
-    },[demoCustomers, searchQuery, filterPeriod, filterVisitCount, sortBy])
+    },[bookingUsers,demoCustomers, searchQuery, filterPeriod, filterVisitCount, sortBy])
 
     const formatDate = (dateString : string) => {
         const date = new Date(dateString);
@@ -321,7 +357,7 @@ export default function Customers () {
                                                     </div>
                                                     <div>
                                                         <h3 className="font-bold text-lg">{customer.name}</h3>
-                                                        <p className="text-xs text-white/80">{customer.nameKana}</p>
+                                                        {/* <p className="text-xs text-white/80">{customer.nameKana}</p> */}
                                                     </div>
                                                 </div>
                                                 {/* {getStatusBadge(customer.status)} */}
@@ -359,10 +395,10 @@ export default function Customers () {
                                             </div>
 
                                             {/* 備考 */}
-                                            {customer.notes && (
+                                            {customer.message && (
                                                 <div className="p-2 bg-gray-50 rounded-lg">
                                                     <p className="text-xs text-gray-600 mb-1">備考</p>
-                                                    <p className="text-sm text-gray-800">{customer.notes}</p>
+                                                    <p className="text-sm text-gray-800">{customer.message}</p>
                                                 </div>
                                             )}
 

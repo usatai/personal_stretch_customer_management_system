@@ -621,7 +621,7 @@ export default function BookingsWithDragDrop() {
                                 <div className="p-6 space-y-4">
                                     {/* 予約タイトル */}
                                     <div>
-                                        <h4 className="text-sm font-medium text-gray-500">タイトル</h4>
+                                        <h4 className="text-sm font-medium text-gray-500">名前</h4>
                                         <p className="text-lg">{selectedBooking.title || '（タイトルなし）'}</p>
                                     </div>
                                     
@@ -780,7 +780,7 @@ export default function BookingsWithDragDrop() {
                                             type="text" 
                                             className="px-1 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150"
                                         >
-                                            
+
                                         </input>
                                     </div>
                                      {/* 日時 */}
