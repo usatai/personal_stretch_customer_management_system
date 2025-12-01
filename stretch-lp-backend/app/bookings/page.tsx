@@ -5,7 +5,6 @@ import { apiClient } from "@/utils/apiClient";
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { BackendBooking, CalendarEvent } from "../types";
 import { convertToCalendarEvents } from "@/utils/bookingExchange";
-import DetailBookings from "@/component/ DetailBooking";
 
 type Booking = {
     id: string;
@@ -63,6 +62,7 @@ export default function BookingsWithDragDrop() {
     const [clientData, setClientData] = useState<CalendarEvent[]>([]);
     const [bookingRegister, setBookingRegister] = useState<boolean>(false);
     const scheduleRef = useRef<HTMLDivElement>(null);
+    const suppressRegisterRef = useRef(false);
 
     const startHour = 9;
     const endHour = 22;
@@ -161,10 +161,15 @@ export default function BookingsWithDragDrop() {
             setIsDragging(false);
             setDraggedBooking(null);
             setHoveredSlot(null);
+            setDidDrag(false);
             return;
         }
 
         if (didDrag) {
+            suppressRegisterRef.current = true;
+            window.setTimeout(() => {
+                suppressRegisterRef.current = false;
+            }, 0);
             if (hoveredSlot === null) {
 
             } else {
@@ -216,6 +221,7 @@ export default function BookingsWithDragDrop() {
                         );
                     });
                 }
+                setBookingRegister(false);
             }
         } else {
             setBookingRegister(false);
@@ -226,6 +232,7 @@ export default function BookingsWithDragDrop() {
         setIsDragging(false);
         setDraggedBooking(null);
         setHoveredSlot(null);
+        setDidDrag(false);
     };
 
     const statusOptions = [
@@ -348,7 +355,11 @@ export default function BookingsWithDragDrop() {
         setSelectedBooking(null);
     }
 
-    const handleBookingRegister = () => {
+    const handleBookingRegister = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (suppressRegisterRef.current || isDragging) {
+            suppressRegisterRef.current = false;
+            return;
+        }
         setBookingRegister(true);
     }
 
