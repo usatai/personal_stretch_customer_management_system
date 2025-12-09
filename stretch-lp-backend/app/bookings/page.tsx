@@ -616,6 +616,12 @@ export default function BookingsWithDragDrop() {
                                         </div>
                                     )}
                                 </div>
+                                <button
+                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
+                                    onClick={() => setCurrentDate(startOfDay(new Date()))}
+                                >
+                                    今日
+                                </button>
                             </div>
                             
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center justify-end">
