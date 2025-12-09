@@ -48,6 +48,31 @@ function formatYMD(date: Date) {
     return `${y}-${m}-${d}`;
 }
 
+function getDaysInMonth(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+}
+
+function getFirstDayOfMonth(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+}
+
+function formatMonthYear(date: Date) {
+    const y = date.getFullYear();
+    const m = date.getMonth() + 1;
+    return `${y}年${m}月`;
+}
+
+function isSameDay(date1: Date, date2: Date) {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+}
+
+function isToday(date: Date) {
+    const today = startOfDay(new Date());
+    return isSameDay(date, today);
+}
+
 export default function BookingsWithDragDrop() {
     const [currentDate, setCurrentDate] = useState<Date>(startOfDay(new Date()));
     const [bookingsState, setBookingsState] = useState<Booking[]>([]);
@@ -63,6 +88,11 @@ export default function BookingsWithDragDrop() {
     const [bookingRegister, setBookingRegister] = useState<boolean>(false);
     const scheduleRef = useRef<HTMLDivElement>(null);
     const suppressRegisterRef = useRef(false);
+    const dateInputRef = useRef<HTMLInputElement>(null);
+    const calendarButtonRef = useRef<HTMLButtonElement>(null);
+    const calendarRef = useRef<HTMLDivElement>(null);
+    const [calendarOpen, setCalendarOpen] = useState(false);
+    const [calendarMonth, setCalendarMonth] = useState<Date>(startOfDay(new Date()));
 
     const startHour = 9;
     const endHour = 22;
@@ -96,6 +126,26 @@ export default function BookingsWithDragDrop() {
         fetchBookings();
 
     }, [currentDate]);
+
+    // カレンダー外クリックで閉じる
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (calendarOpen && 
+                calendarButtonRef.current && 
+                calendarRef.current &&
+                !calendarButtonRef.current.contains(event.target as Node) &&
+                !calendarRef.current.contains(event.target as Node)) {
+                setCalendarOpen(false);
+            }
+        };
+
+        if (calendarOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }
+    }, [calendarOpen]);
 
     const bookings = bookingsState.length > 0 ? bookingsState : clientData;
 
@@ -403,31 +453,172 @@ export default function BookingsWithDragDrop() {
                 >
                     <div className="mx-auto max-w-5xl">
                         {/* ヘッダー */}
-                        <div className="sticky top-0 z-10 px-4 sm:px-0 py-3 mb-3 sm:mb-4 bg-gradient-to-br from-cyan-50/95 via-sky-50/95 to-blue-50/95 backdrop-blur">
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                        <div className="sticky top-0 z-10 px-4 sm:px-0 py-3 bg-gradient-to-br from-cyan-50/95 via-sky-50/95 to-blue-50/95 backdrop-blur">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
+                                {/* 左矢印ボタン */}
                                 <button
-                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
+                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 transition-colors"
                                     onClick={() => setCurrentDate(addDays(currentDate, -1))}
+                                    aria-label="前日"
                                 >
-                                    前日
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M15 18l-6-6 6-6"/>
+                                    </svg>
                                 </button>
-                                <button
-                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
-                                    onClick={() => setCurrentDate(startOfDay(new Date()))}
-                                >
-                                    今日
-                                </button>
-                                <button
-                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
-                                    onClick={() => setCurrentDate(addDays(currentDate, 1))}
-                                >
-                                    翌日
-                                </button>
-                            </div>
-                            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="text-xl sm:text-2xl font-bold text-cyan-900">
+                                
+                                {/* 日付表示 */}
+                                <div className="text-xl sm:text-2xl font-bold text-cyan-900 min-w-[140px] text-center">
                                     {formatYMD(currentDate)}
                                 </div>
+                                
+                                {/* 右矢印ボタン */}
+                                <button
+                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 transition-colors"
+                                    onClick={() => setCurrentDate(addDays(currentDate, 1))}
+                                    aria-label="翌日"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M9 18l6-6-6-6"/>
+                                    </svg>
+                                </button>
+                                
+                                {/* カレンダーボタン */}
+                                <div className="relative">
+                                    <button
+                                        ref={calendarButtonRef}
+                                        className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 transition-colors"
+                                        onClick={() => {
+                                            setCalendarOpen(!calendarOpen);
+                                            setCalendarMonth(new Date(currentDate));
+                                        }}
+                                        aria-label="カレンダーを開く"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                            <line x1="16" y1="2" x2="16" y2="6"/>
+                                            <line x1="8" y1="2" x2="8" y2="6"/>
+                                            <line x1="3" y1="10" x2="21" y2="10"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    {/* カスタムカレンダー */}
+                                    {calendarOpen && (
+                                        <div ref={calendarRef} className="absolute md:left-0 right-0 top-full mt-2 z-50 bg-white rounded-xl shadow-2xl border border-cyan-200 overflow-hidden w-80">
+                                            {/* カレンダーヘッダー */}
+                                            <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-4">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <button
+                                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                                        onClick={() => {
+                                                            const prevMonth = new Date(calendarMonth);
+                                                            prevMonth.setMonth(prevMonth.getMonth() - 1);
+                                                            setCalendarMonth(prevMonth);
+                                                        }}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M15 18l-6-6 6-6"/>
+                                                        </svg>
+                                                    </button>
+                                                    <div className="text-lg font-semibold">
+                                                        {formatMonthYear(calendarMonth)}
+                                                    </div>
+                                                    <button
+                                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                                        onClick={() => {
+                                                            const nextMonth = new Date(calendarMonth);
+                                                            nextMonth.setMonth(nextMonth.getMonth() + 1);
+                                                            setCalendarMonth(nextMonth);
+                                                        }}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M9 18l6-6-6-6"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* 曜日ヘッダー */}
+                                            <div className="grid grid-cols-7 bg-cyan-50/50 border-b border-cyan-100">
+                                                {['日', '月', '火', '水', '木', '金', '土'].map((day, idx) => (
+                                                    <div
+                                                        key={day}
+                                                        className={`p-2 text-center text-xs font-semibold ${
+                                                            idx === 0 ? 'text-red-500' : idx === 6 ? 'text-blue-500' : 'text-cyan-700'
+                                                        }`}
+                                                    >
+                                                        {day}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            
+                                            {/* カレンダーグリッド */}
+                                            <div className="p-3">
+                                                <div className="grid grid-cols-7 gap-1">
+                                                    {(() => {
+                                                        const daysInMonth = getDaysInMonth(calendarMonth);
+                                                        const firstDay = getFirstDayOfMonth(calendarMonth);
+                                                        const days: (Date | null)[] = [];
+                                                        
+                                                        // 前月の空白日
+                                                        for (let i = 0; i < firstDay; i++) {
+                                                            days.push(null);
+                                                        }
+                                                        
+                                                        // 今月の日付
+                                                        for (let day = 1; day <= daysInMonth; day++) {
+                                                            const date = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
+                                                            days.push(date);
+                                                        }
+                                                        
+                                                        return days.map((date, idx) => {
+                                                            if (!date) {
+                                                                return <div key={idx} className="aspect-square" />;
+                                                            }
+                                                            
+                                                            const isSelected = isSameDay(date, currentDate);
+                                                            const isTodayDate = isToday(date);
+                                                            
+                                                            return (
+                                                                <button
+                                                                    key={idx}
+                                                                    className={`aspect-square rounded-lg text-sm font-medium transition-all ${
+                                                                        isSelected
+                                                                            ? 'bg-gradient-to-br from-cyan-500 to-blue-500 text-white shadow-lg scale-105'
+                                                                            : isTodayDate
+                                                                            ? 'bg-cyan-100 text-cyan-700 font-bold border-2 border-cyan-400'
+                                                                            : 'hover:bg-cyan-50 text-gray-700 hover:scale-105'
+                                                                    }`}
+                                                                    onClick={() => {
+                                                                        setCurrentDate(startOfDay(date));
+                                                                        setCalendarOpen(false);
+                                                                    }}
+                                                                >
+                                                                    {date.getDate()}
+                                                                </button>
+                                                            );
+                                                        });
+                                                    })()}
+                                                </div>
+                                            </div>
+                                            
+                                            {/* フッター */}
+                                            <div className="border-t border-cyan-100 p-3 bg-cyan-50/30">
+                                                <button
+                                                    className="w-full px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all font-medium text-sm"
+                                                    onClick={() => {
+                                                        setCurrentDate(startOfDay(new Date()));
+                                                        setCalendarOpen(false);
+                                                    }}
+                                                >
+                                                    今日に戻る
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center justify-end">
                                 <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-cyan-700">
                                     <div className="flex items-center gap-2">
                                         <span className="inline-block w-3 h-3 rounded-sm bg-[#22c55e]" /> 完了
