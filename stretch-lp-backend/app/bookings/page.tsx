@@ -15,6 +15,15 @@ type Booking = {
     color?: string;
 };
 
+type NewBooking = {
+    name: string;
+    startDate: string;
+    startTime: string;
+    course: number;
+    status: string;
+    memo?: string;
+};
+
 function generateTimeSlots(startHour: number, endHour: number) {
     const slots: { label: string; minutes: number }[] = [];
     for (let h = startHour; h <= endHour; h++) {
@@ -93,11 +102,23 @@ export default function BookingsWithDragDrop() {
     const calendarRef = useRef<HTMLDivElement>(null);
     const [calendarOpen, setCalendarOpen] = useState(false);
     const [calendarMonth, setCalendarMonth] = useState<Date>(startOfDay(new Date()));
+    const [year, setYear] = useState(currentDate.getFullYear());
+    const [month, setMonth] = useState(currentDate.getMonth() + 1);
+    const [day, setDay] = useState(currentDate.getDate());
+    const [newBooking, setNewBooking] = useState<NewBooking>({
+        name: "",
+        startDate: `${year}-${month}-${day}`,
+        startTime: "",
+        course: 40,
+        status: "仮予約",
+        memo: "",
+    });
 
     const startHour = 9;
     const endHour = 22;
     const timeSlots = useMemo(() => generateTimeSlots(startHour, endHour), [startHour, endHour]);
     const totalRows = useMemo(() => (endHour - startHour) * 2 + 1, [startHour, endHour]);
+
 
     const fetchBookings = async () => {
         try {
@@ -286,9 +307,9 @@ export default function BookingsWithDragDrop() {
     };
 
     const statusOptions = [
-        { label: "完了", color: "#22c55e" },
-        { label: "予約確定", color: "#3b82f6" },
         { label: "仮予約", color: "#f59e0b" },
+        { label: "予約確定", color: "#3b82f6" },
+        { label: "完了", color: "#22c55e" },
         { label: "キャンセル", color: "#ef4444" },
     ];
 
@@ -411,6 +432,11 @@ export default function BookingsWithDragDrop() {
             return;
         }
         setBookingRegister(true);
+    }
+
+    // 新しいユーザーの登録
+    const setNewBookingUser = () => {
+        console.log(newBooking);
     }
 
     return (
@@ -986,6 +1012,10 @@ export default function BookingsWithDragDrop() {
                                         <h4 className="text-sm font-medium text-gray-500">名前</h4>
                                         <input
                                             type="text"
+                                            // value={newBooking.name}
+                                            onChange={(e) => {
+                                                setNewBooking({...newBooking, name: e.target.value})
+                                            }}
                                             className="pl-3 pr-4 py-3 bg-white border border-gray-300 text-medium rounded-xl w-75 focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all text-gray-900 placeholder:text-gray-400" 
                                         >
                                         </input>
@@ -994,20 +1024,50 @@ export default function BookingsWithDragDrop() {
                                      <div>
                                         <h4 className="text-sm font-medium text-gray-500">日時</h4>
                                         <p className="text-lg">
-                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
+                                            <select 
+                                                value={year}
+                                                onChange={e => {
+                                                    const y = Number(e.target.value);
+                                                    setYear(y);
+                                                    setNewBooking({
+                                                        ...newBooking,
+                                                        startDate: `${y}-${month}-${day}`,
+                                                    })
+                                                }}
+                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
                                                 <option value="2024">2024</option>
                                                 <option value="2025">2025</option>
                                                 <option value="2026">2026</option>
                                             </select>
                                             {' 年 '}
-                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
+                                            <select 
+                                                value={month}
+                                                onChange={e => {
+                                                    const m = Number(e.target.value);
+                                                    setMonth(m);
+                                                    setNewBooking({
+                                                        ...newBooking,
+                                                        startDate: `${year}-${m}-${day}`,
+                                                    })
+                                                }}
+                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
                                                 {[...Array(12)].map((_, i) => (
                                                     <option key={i + 1} value={i + 1}>{i + 1}</option>
                                                 ))}
                                             </select>
                                             {' 月 '}
 
-                                            <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
+                                            <select 
+                                                value={day}
+                                                onChange={e => {
+                                                    const d = Number(e.target.value);
+                                                    setDay(d);
+                                                    setNewBooking({
+                                                        ...newBooking,
+                                                        startDate: `${year}-${month}-${d}`,
+                                                    })
+                                                }}
+                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
                                                 {[...Array(31)].map((_, i) => (
                                                     <option key={i + 1} value={i + 1}>{i + 1}</option>
                                                 ))}
@@ -1017,7 +1077,11 @@ export default function BookingsWithDragDrop() {
                                         <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
                                         <p className="text-lg font-mono">
                                            {/* 時間のフォーマット */}
-                                           <select className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-allduration-150">
+                                           <select 
+                                                onChange={(e) => {
+                                                    setNewBooking({...newBooking, startTime: e.target.value})
+                                                }}
+                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-allduration-150">
                                                 {timeOptions.map((time) => (
                                                 <option key={time} value={time}>
                                                     {time}
@@ -1028,7 +1092,11 @@ export default function BookingsWithDragDrop() {
                                         </p>
                                         <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
                                         <p className="text-lg font-mono">
-                                            <select className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
+                                            <select 
+                                                onChange={(e) => {
+                                                    setNewBooking({...newBooking, course: Number(e.target.value)})
+                                                }}
+                                                className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
                                                 {statusCourse.map((data) => (
                                                 <option key={data.course} value={data.value}>
                                                     {data.course}
@@ -1041,7 +1109,10 @@ export default function BookingsWithDragDrop() {
                                     {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
                                     <div>
                                         <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
-                                        <select 
+                                        <select
+                                            onChange={(e) => {
+                                                setNewBooking({...newBooking, status: e.target.value})
+                                            }}
                                             className="w-75 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
                                            {statusOptions.map((data) => (
                                                 <option key={data.color}>{data.label}</option>
@@ -1051,7 +1122,12 @@ export default function BookingsWithDragDrop() {
 
                                     <div>
                                         <h4 className="text-sm font-medium text-gray-500">メモ</h4>
-                                        <textarea className="w-full px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150"></textarea>
+                                        <textarea 
+                                            onChange={(e) => {
+                                                setNewBooking({...newBooking, memo: e.target.value})
+                                            }}
+                                            className="w-full px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
+                                        </textarea>
                                         
                                     </div>
                                 
@@ -1060,7 +1136,7 @@ export default function BookingsWithDragDrop() {
                                 <div className="flex items-center justify-end p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">         
                                     <button
                                         className="px-4 py-2 mr-3 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
-                                        onClick={() => changeBooking()}
+                                        onClick={() => setNewBookingUser()}
                                     >
                                         登録
                                     </button>
