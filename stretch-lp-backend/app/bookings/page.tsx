@@ -15,15 +15,6 @@ type Booking = {
     color?: string;
 };
 
-type NewBooking = {
-    name: string;
-    startDate: string;
-    startTime: string;
-    course: number;
-    status: string;
-    memo?: string;
-};
-
 function generateTimeSlots(startHour: number, endHour: number) {
     const slots: { label: string; minutes: number }[] = [];
     for (let h = startHour; h <= endHour; h++) {
@@ -102,18 +93,7 @@ export default function BookingsWithDragDrop() {
     const calendarRef = useRef<HTMLDivElement>(null);
     const [calendarOpen, setCalendarOpen] = useState(false);
     const [calendarMonth, setCalendarMonth] = useState<Date>(startOfDay(new Date()));
-    const [year, setYear] = useState(currentDate.getFullYear());
-    const [month, setMonth] = useState(currentDate.getMonth() + 1);
-    const [day, setDay] = useState(currentDate.getDate());
-    const [newBooking, setNewBooking] = useState<NewBooking>({
-        name: "",
-        startDate: `${year}-${month}-${day}`,
-        startTime: "",
-        course: 40,
-        status: "仮予約",
-        memo: "",
-    });
-
+    
     const startHour = 9;
     const endHour = 22;
     const timeSlots = useMemo(() => generateTimeSlots(startHour, endHour), [startHour, endHour]);
@@ -435,8 +415,11 @@ export default function BookingsWithDragDrop() {
     }
 
     // 新しいユーザーの登録
-    const setNewBookingUser = () => {
-        console.log(newBooking);
+    const setNewBookingUser = async () => {
+        const response = await apiClient("/setBooking",{
+
+
+        })
     }
 
     return (
@@ -969,189 +952,6 @@ export default function BookingsWithDragDrop() {
                                 </div>
                             </div>
                         </div>
-                    )}
-
-                    {bookingRegister && (
-                        <div 
-                            // 1. オーバーレイ (背景)
-                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-                            // オーバーレイクリックで閉じる
-                            onClick={() => {
-                                // setIsDetailModalOpen(false);
-                                setBookingRegister(false);
-                            }}
-                        >
-                             <div
-                                // モーダル内部のクリックが、背景のonClickに伝播(バブリング)するのを防ぐ
-                                onClick={(e) => e.stopPropagation()} 
-                                // モーダルのスタイル (白背景、角丸、影、サイズ)
-                                className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 text-gray-900"
-                            >
-                                {/* --- ヘッダー --- */}
-                                <div className="flex justify-between items-center p-4 border-b border-gray-200">
-                                    <h3 className="text-lg font-semibold">
-                                        予約登録
-                                    </h3>
-                                    <button
-                                        onClick={() => {
-                                            // setIsDetailModalOpen(false);
-                                            setBookingRegister(false);
-                                        }}
-                                        className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
-                                    >
-                                        {/* Xボタン (Heroiconsより) */}
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                {/* --- ボディ --- */}
-                                <div className="p-6 space-y-4">
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-500">名前</h4>
-                                        <input
-                                            type="text"
-                                            // value={newBooking.name}
-                                            onChange={(e) => {
-                                                setNewBooking({...newBooking, name: e.target.value})
-                                            }}
-                                            className="pl-3 pr-4 py-3 bg-white border border-gray-300 text-medium rounded-xl w-75 focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all text-gray-900 placeholder:text-gray-400" 
-                                        >
-                                        </input>
-                                    </div>
-                                     {/* 日時 */}
-                                     <div>
-                                        <h4 className="text-sm font-medium text-gray-500">日時</h4>
-                                        <p className="text-lg">
-                                            <select 
-                                                value={year}
-                                                onChange={e => {
-                                                    const y = Number(e.target.value);
-                                                    setYear(y);
-                                                    setNewBooking({
-                                                        ...newBooking,
-                                                        startDate: `${y}-${month}-${day}`,
-                                                    })
-                                                }}
-                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
-                                                <option value="2024">2024</option>
-                                                <option value="2025">2025</option>
-                                                <option value="2026">2026</option>
-                                            </select>
-                                            {' 年 '}
-                                            <select 
-                                                value={month}
-                                                onChange={e => {
-                                                    const m = Number(e.target.value);
-                                                    setMonth(m);
-                                                    setNewBooking({
-                                                        ...newBooking,
-                                                        startDate: `${year}-${m}-${day}`,
-                                                    })
-                                                }}
-                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
-                                                {[...Array(12)].map((_, i) => (
-                                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
-                                                ))}
-                                            </select>
-                                            {' 月 '}
-
-                                            <select 
-                                                value={day}
-                                                onChange={e => {
-                                                    const d = Number(e.target.value);
-                                                    setDay(d);
-                                                    setNewBooking({
-                                                        ...newBooking,
-                                                        startDate: `${year}-${month}-${d}`,
-                                                    })
-                                                }}
-                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
-                                                {[...Array(31)].map((_, i) => (
-                                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
-                                                ))}
-                                            </select>
-                                            {' 日 '}
-                                        </p>
-                                        <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
-                                        <p className="text-lg font-mono">
-                                           {/* 時間のフォーマット */}
-                                           <select 
-                                                onChange={(e) => {
-                                                    setNewBooking({...newBooking, startTime: e.target.value})
-                                                }}
-                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-allduration-150">
-                                                {timeOptions.map((time) => (
-                                                <option key={time} value={time}>
-                                                    {time}
-                                                </option>
-                                                ))}
-                                            </select>
-                                            
-                                        </p>
-                                        <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
-                                        <p className="text-lg font-mono">
-                                            <select 
-                                                onChange={(e) => {
-                                                    setNewBooking({...newBooking, course: Number(e.target.value)})
-                                                }}
-                                                className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
-                                                {statusCourse.map((data) => (
-                                                <option key={data.course} value={data.value}>
-                                                    {data.course}
-                                                </option>
-                                                ))}
-                                            </select>
-                                        </p>
-                                    </div>
-                                    
-                                    {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
-                                        <select
-                                            onChange={(e) => {
-                                                setNewBooking({...newBooking, status: e.target.value})
-                                            }}
-                                            className="w-75 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
-                                           {statusOptions.map((data) => (
-                                                <option key={data.color}>{data.label}</option>
-                                           ))}
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-500">メモ</h4>
-                                        <textarea 
-                                            onChange={(e) => {
-                                                setNewBooking({...newBooking, memo: e.target.value})
-                                            }}
-                                            className="w-full px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all duration-150">
-                                        </textarea>
-                                        
-                                    </div>
-                                
-                                </div>
-                                {/* --- フッター --- */}
-                                <div className="flex items-center justify-end p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">         
-                                    <button
-                                        className="px-4 py-2 mr-3 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
-                                        onClick={() => setNewBookingUser()}
-                                    >
-                                        登録
-                                    </button>
-                                    <button
-                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                                        onClick={() => {
-                                            setBookingRegister(false);
-                                        }}
-                                    >
-                                        閉じる
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                             
                     )}
                 </div>
             </div>
