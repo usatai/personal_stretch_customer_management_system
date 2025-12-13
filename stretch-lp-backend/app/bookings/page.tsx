@@ -414,14 +414,6 @@ export default function BookingsWithDragDrop() {
         setBookingRegister(true);
     }
 
-    // 新しいユーザーの登録
-    const setNewBookingUser = async () => {
-        const response = await apiClient("/setBooking",{
-
-
-        })
-    }
-
     return (
         <div className="relative min-h-screen bg-gray-50 md:flex">
             {/* オーバーレイ（モバイル時サイドバー開時のみ） */}

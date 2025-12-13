@@ -4,19 +4,6 @@ import Sidebar from "@/component/Sidebar";
 import { apiClient } from "@/utils/apiClient";
 import { useEffect, useMemo, useState } from "react";
 
-type Customer = {
-    id: string;
-    name: string;
-    nameKana: string;
-    email: string;
-    phone: string;
-    lastVisitDate: string; // YYYY-MM-DD
-    visitCount: number;
-    totalSpent: number;
-    status: 'active' | 'inactive' | 'vip';
-    notes?: string;
-}
-
 type Users = {
     id: string;
     name: string;
@@ -35,102 +22,13 @@ export default function Customers () {
     const [sortBy, setSortBy] = useState<string>('lastVisit'); 
     const [customerId,setCustomerId] = useState<string | null>("");
     const [bookingUsers, setBookingUser] = useState<Users[]>([]);
-
-    const demoCustomers: Customer[] = useMemo(() => [
-        {
-            id: '1',
-            name: '山田 太郎',
-            nameKana: 'ヤマダ タロウ',
-            email: 'yamada@example.com',
-            phone: '090-1234-5678',
-            lastVisitDate: '2024-01-15',
-            visitCount: 12,
-            totalSpent: 120000,
-            status: 'vip',
-            notes: '腰痛改善希望'
-        },
-        {
-            id: '2',
-            name: '佐藤 花子',
-            nameKana: 'サトウ ハナコ',
-            email: 'sato@example.com',
-            phone: '080-2345-6789',
-            lastVisitDate: '2024-01-10',
-            visitCount: 8,
-            totalSpent: 80000,
-            status: 'active',
-            notes: '柔軟性向上が目標'
-        },
-        {
-            id: '3',
-            name: '鈴木 次郎',
-            nameKana: 'スズキ ジロウ',
-            email: 'suzuki@example.com',
-            phone: '070-3456-7890',
-            lastVisitDate: '2023-12-20',
-            visitCount: 3,
-            totalSpent: 30000,
-            status: 'active'
-        },
-        {
-            id: '4',
-            name: '田中 美咲',
-            nameKana: 'タナカ ミサキ',
-            email: 'tanaka@example.com',
-            phone: '090-4567-8901',
-            lastVisitDate: '2024-01-12',
-            visitCount: 15,
-            totalSpent: 150000,
-            status: 'vip',
-            notes: 'パーソナルトレーニング継続中'
-        },
-        {
-            id: '5',
-            name: '伊藤 健太',
-            nameKana: 'イトウ ケンタ',
-            email: 'ito@example.com',
-            phone: '080-5678-9012',
-            lastVisitDate: '2023-11-15',
-            visitCount: 2,
-            totalSpent: 20000,
-            status: 'inactive'
-        },
-        {
-            id: '6',
-            name: '渡辺 さくら',
-            nameKana: 'ワタナベ サクラ',
-            email: 'watanabe@example.com',
-            phone: '070-6789-0123',
-            lastVisitDate: '2024-01-14',
-            visitCount: 6,
-            totalSpent: 60000,
-            status: 'active',
-            notes: 'ストレッチ習慣化中'
-        },
-        {
-            id: '7',
-            name: '中村 大輔',
-            nameKana: 'ナカムラ ダイスケ',
-            email: 'nakamura@example.com',
-            phone: '090-7890-1234',
-            lastVisitDate: '2024-01-08',
-            visitCount: 20,
-            totalSpent: 200000,
-            status: 'vip',
-            notes: 'リピーター、紹介顧客多数'
-        },
-        {
-            id: '8',
-            name: '小林 あゆみ',
-            nameKana: 'コバヤシ アユミ',
-            email: 'kobayashi@example.com',
-            phone: '080-8901-2345',
-            lastVisitDate: '2023-10-30',
-            visitCount: 1,
-            totalSpent: 10000,
-            status: 'inactive'
-        }
-    ], []);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [newCustomer, setNewCustomer] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        message: ""
+    });
 
     const getBookingUser = async () => {
         try {
@@ -220,7 +118,7 @@ export default function Customers () {
             }
         });
         return filtered;
-    },[bookingUsers,demoCustomers, searchQuery, filterPeriod, filterVisitCount, sortBy])
+    },[bookingUsers,searchQuery, filterPeriod, filterVisitCount, sortBy])
 
     const formatDate = (dateString : string) => {
         const date = new Date(dateString);
@@ -228,12 +126,17 @@ export default function Customers () {
 
     }
 
-    const selectedCustomer = customerId 
-        ? demoCustomers.filter(customer => customer.id === customerId)
-        : null;
-
     const updateNotes = (notes : string) => {
 
+    }
+
+    // 新しいユーザーの登録
+    const setNewBookingUser = async () => {
+        console.log(newCustomer);
+        // const response = await apiClient("/setBooking",{
+
+
+        // })
     }
 
     return (
@@ -275,6 +178,14 @@ export default function Customers () {
                             <div className="mb-6 space-y-4">
                                 <h1 className="text-3xl font-bold text-gray-900 text-center md:text-left">顧客管理</h1>
                                 <p className="mt-1 text-sm text-gray-600 text-center md:text-left">過去来店されたお客様情報が確認できます</p>
+                                <div className="flex">
+                                    <button
+                                        onClick={() => setIsCreateModalOpen(true)}
+                                        className="px-4 py-2 bg-cyan-600 text-white font-semibold rounded-lg shadow hover:bg-cyan-700 transition"
+                                    >
+                                        ＋ 新規顧客登録
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="relative mb-6">
@@ -335,6 +246,7 @@ export default function Customers () {
                                     </select>
                                 </div>
                             </div>
+
                             {/* 結果数表示 */}
                             <div className="text-sm text-gray-600 mt-3">
                                 {filteredAndSortedCustomers.length}件の顧客が見つかりました
@@ -421,86 +333,100 @@ export default function Customers () {
                         </div>
                     </div>
                 </div>
-                
-                {selectedCustomer && (
-                    <div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
-                        onClick={() => setCustomerId(null)}
+
+                {isCreateModalOpen && (
+                    <div 
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+                        onClick={() => {
+                            setIsCreateModalOpen(false);
+                        }}
                     >
-                            {/* 顧客カード詳細 */}
-                            {selectedCustomer.map(customer => (
-                                <div
-                                    key={customer.id}
-                                    onClick={(e) => e.stopPropagation()} 
-                                    className="bg-white rounded-2xl shadow-lg border-2 border-cyan-200/50 hover:border-cyan-400 hover:shadow-xl transition-all duration-200 overflow-hidden group"
-                                >
-                                        <div className="bg-gradient-to-r from-cyan-500 to-blue-500 p-4 pr-50 text-white">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-xl font-bold backdrop-blur-sm">
-                                                        {customer.name.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-bold text-lg">{customer.name}</h3>
-                                                        <p className="text-xs text-white/80">{customer.nameKana}</p>
-                                                    </div>
-                                                </div>
-                                                {/* {getStatusBadge(customer.status)} */}
-                                            </div>
-                                        </div>
-
-                                        {/* カードボディ */}
-                                        <div className="p-4 space-y-3">
-                                            {/* 来店情報 */}
-                                            <div className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg">
-                                                <div>
-                                                    <p className="text-xs text-gray-600">最終来店日</p>
-                                                    <p className="font-semibold text-gray-900">{formatDate(customer.lastVisitDate)}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-xs text-gray-600">来店回数</p>
-                                                    <p className="font-bold text-cyan-600 text-lg">{customer.visitCount}回</p>
-                                                </div>
-                                            </div>
-
-                                            {/* 連絡先情報 */}
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex items-center gap-2 text-gray-700">
-                                                    <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                    </svg>
-                                                    <span className="truncate">{customer.email}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-gray-700">
-                                                    <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                                    </svg>
-                                                    <span>{customer.phone}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-gray-700">
-                                                    <span>前回担当トレーナー：</span>
-                                                    <span>田島</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-gray-700">
-                                                    <span>次回予約：</span>
-                                                    <span>なし</span>
-                                                </div>
-                                            </div>
-
-                                            {/* 備考 */}
-                                            <div className="p-2 bg-gray-50 rounded-lg">
-                                                <p className="text-xs text-gray-600 mb-1">備考</p>
-                                                <input
-                                                    type="text"
-                                                    value={customer.notes}
-                                                    onChange={(e) => updateNotes(e.target.value)}
-                                                    className="pl-3 pr-4 py-3 bg-white border border-cyan-200 text-sm rounded-xl w-full focus:ring-4 focus:ring-cyan-300/50 focus:border-cyan-400 outline-none transition-all text-gray-900 placeholder:text-gray-400" 
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                        <div 
+                            className="bg-white rounded-xl shadow-xl w-full max-w-sm md:max-w-lg"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* --- ヘッダー --- */}
+                            <div className="px-6 py-4 border-b bg-gray-50 rounded-t-xl">
+                                <h2 className="text-xl font-semibold text-gray-900">新規顧客登録</h2>
+                                <p className="text-sm text-gray-500 mt-1">必要な情報を入力してください（※名前のみ必須）</p>
                             </div>
+
+                            {/* --- ボディ --- */}
+                            <div className="p-6 space-y-6">
+
+                                {/* 名前 */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">名前（必須）</h4>
+                                    <input
+                                        type="text"
+                                        placeholder="例: 山田 太郎"
+                                        value={newCustomer.name}
+                                        onChange={(e) =>
+                                            setNewCustomer({ ...newCustomer, name: e.target.value })
+                                        }
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150"
+                                    />
+                                </div>
+
+                                {/* メール */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">メール（任意）</h4>
+                                    <input
+                                        type="email"
+                                        placeholder="例: example@gmail.com"
+                                        value={newCustomer.email}
+                                        onChange={(e) =>
+                                            setNewCustomer({ ...newCustomer, email: e.target.value })
+                                        }
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150"
+                                    />
+                                </div>
+
+                                {/* 電話番号 */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">電話番号（任意）</h4>
+                                    <input
+                                        type="text"
+                                        placeholder="例: 080-1234-5678"
+                                        value={newCustomer.phone}
+                                        onChange={(e) =>
+                                            setNewCustomer({ ...newCustomer, phone: e.target.value })
+                                        }
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150"
+                                    />
+                                </div>
+
+                                {/* 備考 */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">備考（任意）</h4>
+                                    <textarea
+                                        placeholder="例: Instagram 経由、新規のお客様"
+                                        value={newCustomer.message}
+                                        onChange={(e) =>
+                                            setNewCustomer({ ...newCustomer, message: e.target.value })
+                                        }
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150 h-24"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* --- フッター: ボタン --- */}
+                            <div className="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+                                <button
+                                    onClick={setNewBookingUser}
+                                    className="px-9 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                                >
+                                    登録
+                                </button>
+                                <button
+                                    className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700"
+                                    onClick={() => setIsCreateModalOpen(false)}
+                                >
+                                    キャンセル
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
 
             </>
