@@ -148,7 +148,14 @@ export default function Customers () {
         }
 
         console.log("登録成功");
+        await getBookingUser();
 
+        setNewCustomer({
+            name: "",
+            email: "",
+            phone: "",
+            message: ""
+        });
         setIsCreateModalOpen(false);
     }
 
