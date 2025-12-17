@@ -133,10 +133,23 @@ export default function Customers () {
     // 新しいユーザーの登録
     const setNewBookingUser = async () => {
         console.log(newCustomer);
-        // const response = await apiClient("/setBooking",{
+        const response = await apiClient("/setCustomer", {
+            method: "POST",
+            body: JSON.stringify({
+                name: newCustomer.name,
+                email: newCustomer?.email,
+                phone: newCustomer?.phone,
+                memo: newCustomer?.message
+            }),
+        });
 
+        if (!response.ok) {
+            console.error("ユーザーの保存に失敗しました");
+        }
 
-        // })
+        console.log("登録成功");
+
+        setIsCreateModalOpen(false);
     }
 
     return (
