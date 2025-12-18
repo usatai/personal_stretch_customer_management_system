@@ -10,6 +10,7 @@ type Users = {
     email: string;
     phone: string;
     lastVisitDate: string; // YYYY-MM-DD
+    firstVisitDate?: string; // YYYY-MM-DD 初回来店日
     visitCount: number;
     message?: string;
 }
@@ -23,6 +24,7 @@ export default function Customers () {
     const [customerId,setCustomerId] = useState<string | null>("");
     const [bookingUsers, setBookingUser] = useState<Users[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [customerMenu, setCustomerMenu] = useState(false);
     const [newCustomer, setNewCustomer] = useState({
         name: "",
         email: "",
@@ -449,6 +451,174 @@ export default function Customers () {
                         </div>
                     </div>
                 )}
+
+                {customerId && (() => {
+                    const selectedCustomer = bookingUsers.find(c => c.id === customerId);
+                    if (!selectedCustomer) return null;
+                    
+                    return (
+                        <div 
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+                            onClick={() => {
+                                setCustomerId(null);
+                            }}
+                        >
+                            <div 
+                                className="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* --- ヘッダー --- */}
+                                <div className="px-4 py-3 border-b bg-gradient-to-r from-cyan-500 to-blue-500 rounded-t-xl">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold backdrop-blur-sm text-white">
+                                                {selectedCustomer.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <h2 className="text-xl font-semibold text-white">顧客詳細情報</h2>
+                                                <p className="text-xs text-white/80 mt-0.5">{selectedCustomer.name}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setCustomerId(null)}
+                                            className="px-3 py-1.5 text-xs font-medium text-white bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                                        >
+                                            キャンセル
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* --- ボディ --- */}
+                                <div className="p-4 space-y-4">
+                                    {/* 統計情報カード */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div className="p-3 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg border border-cyan-200">
+                                            <p className="text-xs text-gray-600 mb-0.5">来店回数</p>
+                                            <p className="text-2xl font-bold text-cyan-600">{selectedCustomer.visitCount}回</p>
+                                        </div>
+                                        <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                                            <p className="text-xs text-gray-600 mb-0.5">最終来店日</p>
+                                            <p className="text-base font-semibold text-gray-900">{formatDate(selectedCustomer.lastVisitDate)}</p>
+                                        </div>
+                                        <div className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                                            <p className="text-xs text-gray-600 mb-0.5">初回来店日</p>
+                                            <p className="text-base font-semibold text-gray-900">
+                                                {selectedCustomer.firstVisitDate ? formatDate(selectedCustomer.firstVisitDate) : 'データ未登録'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* 基本情報 */}
+                                        <div className="space-y-3">
+                                            <h3 className="text-base font-semibold text-gray-900 border-b border-gray-200 pb-1.5">基本情報</h3>
+                                            
+                                            <div className="space-y-2.5">
+                                                <div>
+                                                    <p className="text-xs text-gray-600 mb-0.5">名前</p>
+                                                    <p className="text-sm font-medium text-gray-900">{selectedCustomer.name}</p>
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs text-gray-600 mb-0.5">メールアドレス</p>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <svg className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                        </svg>
+                                                        <p className="text-sm text-gray-900 break-all">{selectedCustomer.email || '-'}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs text-gray-600 mb-0.5">電話番号</p>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <svg className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                        </svg>
+                                                        <p className="text-sm text-gray-900">{selectedCustomer.phone || '-'}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 来店情報・その他 */}
+                                        <div className="space-y-3">
+                                            <h3 className="text-base font-semibold text-gray-900 border-b border-gray-200 pb-1.5">来店情報</h3>
+                                            
+                                            <div className="space-y-2.5">
+                                                <div className="p-2.5 bg-cyan-50 rounded-lg">
+                                                    <p className="text-xs text-gray-600 mb-0.5">最終来店日</p>
+                                                    <p className="text-sm font-semibold text-gray-900">{formatDate(selectedCustomer.lastVisitDate)}</p>
+                                                </div>
+
+                                                <div className="p-2.5 bg-blue-50 rounded-lg">
+                                                    <p className="text-xs text-gray-600 mb-0.5">初回来店日</p>
+                                                    <p className="text-sm font-semibold text-gray-900">
+                                                        {selectedCustomer.firstVisitDate ? formatDate(selectedCustomer.firstVisitDate) : 'データ未登録'}
+                                                    </p>
+                                                </div>
+
+                                                {/* 予約履歴（後で実装） */}
+                                                <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                                                    <p className="text-xs text-gray-600 mb-1.5">予約履歴</p>
+                                                    <p className="text-xs text-gray-500 italic">データ未実装</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 備考・メモ */}
+                                    {selectedCustomer.message && (
+                                        <div>
+                                            <h3 className="text-base font-semibold text-gray-900 border-b border-gray-200 pb-1.5 mb-2">備考・メモ</h3>
+                                            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                                <p className="text-sm text-gray-800 whitespace-pre-wrap">{selectedCustomer.message}</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 追加情報セクション（後で実装用） */}
+                                    <div className="border-t border-gray-200 pt-3">
+                                        <h3 className="text-base font-semibold text-gray-900 mb-2">追加情報</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                                                <p className="text-xs text-gray-600 mb-0.5">顧客登録日</p>
+                                                <p className="text-xs text-gray-500 italic">データ未実装</p>
+                                            </div>
+                                            <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                                                <p className="text-xs text-gray-600 mb-0.5">平均来店間隔</p>
+                                                <p className="text-xs text-gray-500 italic">データ未実装</p>
+                                            </div>
+                                            <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                                                <p className="text-xs text-gray-600 mb-0.5">好みのコース</p>
+                                                <p className="text-xs text-gray-500 italic">データ未実装</p>
+                                            </div>
+                                            <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                                                <p className="text-xs text-gray-600 mb-0.5">総利用金額</p>
+                                                <p className="text-xs text-gray-500 italic">データ未実装</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* --- フッター: ボタン --- */}
+                                <div className="px-4 py-3 border-t bg-gray-50 flex justify-end gap-2 rounded-b-xl">
+                                    <button
+                                        className="px-4 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        予約を作成
+                                    </button>
+                                    <button
+                                        className="px-3 py-1.5 text-xs font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                                        onClick={() => setCustomerId(null)}
+                                    >
+                                        閉じる
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
             </>
     )
