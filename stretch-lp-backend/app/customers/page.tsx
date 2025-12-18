@@ -121,6 +121,7 @@ export default function Customers () {
     },[bookingUsers,searchQuery, filterPeriod, filterVisitCount, sortBy])
 
     const formatDate = (dateString : string) => {
+        if (!dateString) return '-'; 
         const date = new Date(dateString);
         return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 
