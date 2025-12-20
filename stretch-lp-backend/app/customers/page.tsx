@@ -575,11 +575,11 @@ export default function Customers () {
                             }}
                         >
                             <div 
-                                className="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4"
+                                className="bg-white rounded-xl shadow-xl w-full max-w-lg sm:max-w-xl md:max-w-2xl max-h-[80vh] mx-3 flex flex-col"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 {/* --- ヘッダー --- */}
-                                <div className="px-4 py-3 border-b bg-gradient-to-r from-cyan-500 to-blue-500 rounded-t-xl">
+                                <div className="px-3 py-2 border-b bg-gradient-to-r from-cyan-500 to-blue-500 rounded-t-xl">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2.5">
                                             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold backdrop-blur-sm text-white">
@@ -600,7 +600,7 @@ export default function Customers () {
                                 </div>
 
                                 {/* --- ボディ --- */}
-                                <div className="p-4 space-y-4">
+                                <div className="flex-1 overflow-y-auto p-4 space-y-4">
                                     {/* 統計情報カード */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div className="p-3 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg border border-cyan-200">
@@ -713,7 +713,7 @@ export default function Customers () {
                                 </div>
 
                                 {/* --- フッター: ボタン --- */}
-                                <div className="px-4 py-3 border-t bg-gray-50 flex justify-end gap-2 rounded-b-xl">
+                                <div className="flex-shrink-0 px-4 py-3 border-t bg-gray-50 flex justify-end gap-2 rounded-b-xl">
                                     <button
                                         className="px-4 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                                     >
