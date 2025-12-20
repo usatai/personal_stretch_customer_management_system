@@ -2,7 +2,7 @@
 
 import Sidebar from "@/component/Sidebar";
 import { apiClient } from "@/utils/apiClient";
-import { useEffect, useMemo, useState } from "react";
+import { ReactEventHandler, useEffect, useMemo, useState } from "react";
 
 type Users = {
     id: string;
@@ -15,6 +15,14 @@ type Users = {
     message?: string;
 }
 
+type Booking = {
+    id: string;
+    name: string;
+    start: string;
+    stretchCourse: number;
+    color?: string;
+};
+
 export default function Customers () {
     const [sidebarOpen,setSidebarOpen] = useState<boolean>(false);
     const [searchQuery,setSearchQuery] = useState<string>("");
@@ -24,7 +32,14 @@ export default function Customers () {
     const [customerId,setCustomerId] = useState<string | null>("");
     const [bookingUsers, setBookingUser] = useState<Users[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [customerMenu, setCustomerMenu] = useState(false);
+    const [customerBooking, setCustomerBooking] = useState<string | null>("");
+    const [bookingData, setBookingData] = useState<Booking>({
+        id: '',
+        name: '',
+        start: new Date().toISOString(), // 現在時刻
+        stretchCourse: 40,
+        color: '仮予約'
+    })
     const [newCustomer, setNewCustomer] = useState({
         name: "",
         email: "",
@@ -126,12 +141,89 @@ export default function Customers () {
         if (!dateString) return '-'; 
         const date = new Date(dateString);
         return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-
     }
 
-    const updateNotes = (notes : string) => {
+    const statusCourse = [
+        { course: "40分", value: 40 },
+        { course: "60分", value: 60 },
+        { course: "80分", value: 80 },
+    ];
 
+    const statusOptions = [
+        { label: "仮予約", color: "#f59e0b" },
+        { label: "予約確定", color: "#3b82f6" },
+        { label: "完了", color: "#22c55e" },
+        { label: "キャンセル", color: "#ef4444" },
+    ];
+
+    const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        if (!bookingData) return;
+        setBookingData({...bookingData,stretchCourse: Number(e.target.value)});
     }
+
+    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        if (!bookingData) return;
+        setBookingData({...bookingData,color: e.target.value});
+    }
+
+    const handleStrechDateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        if (!bookingData) return;
+        setBookingData({...bookingData,start: e.target.value});
+    }
+
+    
+    const handleDateChange = (e: React.ChangeEvent<HTMLSelectElement>,part: string) => {
+        // // 現在の開始日時をDateオブジェクトとして取得
+        // const currentStart = new Date(bookingData.start);
+        let newStart = new Date(bookingData.start);
+        const newValue = Number(e.target.value);
+
+        // 1. Dateオブジェクト内の日時を設定
+        if (part === 'year') {
+            newStart.setFullYear(newValue);
+        } else if (part === 'month') {
+            newStart.setMonth(newValue - 1);
+        } else if (part === 'day') {
+            newStart.setDate(newValue);
+        } else if (part === 'time') {
+            const [hours, minutes] = e.target.value.split(':').map(Number);
+            // 時と分をローカル時刻として設定
+            newStart.setHours(hours, minutes, 0, 0); 
+        }
+
+        // // 2. ローカル時刻を保ったまま、ZなしのISO形式の文字列に変換
+
+        // Dateオブジェクトから各要素を取得し、2桁にパディング
+        const year = newStart.getFullYear();
+        const month = String(newStart.getMonth() + 1).padStart(2, '0');
+        const day = String(newStart.getDate()).padStart(2, '0');
+        const hour = String(newStart.getHours()).padStart(2, '0');
+        const minute = String(newStart.getMinutes()).padStart(2, '0');
+        const second = '00'; // 秒は固定で00
+        
+        // YYYY-MM-DDTHH:MM:SS 形式の文字列を作成
+        const localIsoString = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+
+        // 3. selectedBooking State を更新
+        setBookingData({ 
+            ...bookingData,
+            start: localIsoString
+        });
+    };
+
+    const generateTimeOptions = () => {
+        const times: string[] = [];
+        for (let h = 9; h < 21; h++) {
+          for (let m = 0; m < 60; m+=30) {
+            const hh = h.toString().padStart(2, '0');
+            const mm = m.toString().padStart(2, '0');
+            times.push(`${hh}:${mm}`);
+          }
+        }
+        return times;
+      };
+    
+    const timeOptions = generateTimeOptions();
 
     // 新しいユーザーの登録
     const setNewBookingUser = async () => {
@@ -160,6 +252,23 @@ export default function Customers () {
             message: ""
         });
         setIsCreateModalOpen(false);
+    }
+
+    useEffect(() => {
+        if (!customerBooking) return;
+      
+        const customer = bookingUsers.find(c => c.id === customerBooking);
+        if (!customer) return;
+      
+        setBookingData(prev => ({
+          ...prev,
+          id: customer.id,
+          name: customer.name,
+        }));
+      }, [customerBooking]);
+
+    const setNewBookingData = () => {
+        console.log(bookingData);
     }
 
     return (
@@ -344,7 +453,9 @@ export default function Customers () {
                                                 >
                                                     詳細
                                                 </button>
-                                                <button className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                                                <button 
+                                                    onClick={() => setCustomerBooking(customer.id)}
+                                                    className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg transition-colors">
                                                     予約
                                                 </button>
                                             </div>
@@ -620,6 +731,144 @@ export default function Customers () {
                     );
                 })()}
 
+                {customerBooking && (() => {
+                    const selectedCustomer = bookingUsers.find(c => c.id === customerBooking);
+                    if (!selectedCustomer) return null;
+
+                    return (
+                        <div 
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+                            onClick={() => {
+                                setCustomerBooking(null);
+                            }}
+                        >
+                        <div 
+                            className="bg-white rounded-xl shadow-xl w-120 max-w-3xl mx-4"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* --- ヘッダー --- */}
+                            <div className="px-4 py-3 border-b bg-gradient-to-r from-cyan-500 to-blue-500 rounded-t-xl">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2.5">
+                                        <div>
+                                            <h2 className="text-xl font-semibold text-white ml-3">予約登録</h2>
+                                            {/* <p className="text-xs text-white/80 mt-0.5">{selectedCustomer.name}</p> */}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/** ボディ */}
+                            <div className="p-6 space-3">
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">名前（必須）</h4>
+                                    <input
+                                        type="text"
+                                        value={selectedCustomer.name}
+                                        readOnly
+                                        className="w-75 px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150"
+                                    />
+                                </div>
+
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500 mt-3">日時</h4>
+                                    <select
+                                        value={new Date(bookingData.start).getFullYear()}
+                                        onChange={(e) => handleDateChange(e,'year')}
+                                        className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                        <option value="2024">2024</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                    </select>
+                                    {'年'}
+
+                                    <select
+                                        value={new Date(bookingData.start).getMonth() + 1}
+                                        onChange={(e) => handleDateChange(e,'month')}
+                                        className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                        {[...Array(12)].map((_, i) => (
+                                            <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                        ))}
+                                    </select>
+                                    {'月'}
+
+                                    <select
+                                        value={new Date(bookingData.start).getDate()}
+                                        onChange={(e) => handleDateChange(e,'day')}
+                                        className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                        {[...Array(31)].map((_, i) => (
+                                            <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                        ))}
+                                    </select>
+                                    {'日'}
+                                </div>
+
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
+                                    <select
+                                        onChange={(e) => {
+                                            handleStrechDateChange(e);
+                                        }}
+                                        className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                        {timeOptions.map((time) => (
+                                            <option key={time} value={time}>
+                                                {time}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
+                                    <select
+                                        onChange={(e) => {
+                                            handleCourseChange(e);
+                                        }}
+                                        className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                        {statusCourse.map((data) => (
+                                        <option key={data.course} value={data.value}>
+                                            {data.course}
+                                        </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500 mt-3">ステータス</h4>
+                                    <select
+                                        onChange={(e) => {
+                                            handleStatusChange(e);
+                                        }}
+                                        className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
+                                        {statusOptions.map((status) => (
+                                            <option key={status.label}>{status.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/** フッター */}
+                            <div className="px-4 py-3 border-t bg-gray-50 flex justify-end gap-2 rounded-b-xl">
+                                <button
+                                    onClick={setNewBookingData}
+                                    className="px-4 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    予約を作成
+                                </button>
+                                <button
+                                    className="px-3 py-1.5 text-xs font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                                    onClick={() => setCustomerBooking(null)}
+                                >
+                                    閉じる
+                                </button>
+                                
+                            </div>
+
+                        </div>
+                        
+                    </div>
+                    )
+                })()}
             </>
     )
     
