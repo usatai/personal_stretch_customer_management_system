@@ -267,8 +267,24 @@ export default function Customers () {
         }));
       }, [customerBooking]);
 
-    const setNewBookingData = () => {
+    const setNewBookingData = async () => {
         console.log(bookingData);
+        const response = await apiClient("/setBooking",{
+            method: "POST",
+            body: JSON.stringify({
+                id: Number(bookingData.id),
+                name: bookingData.name,
+                bookingDate: bookingData.start,
+                course: Number(bookingData.stretchCourse),
+                status: bookingData.color
+            }),
+        })
+
+        if (!response.ok) {
+            console.error("登録失敗");
+        }
+
+        console.log(response.body);
     }
 
     return (
@@ -806,8 +822,9 @@ export default function Customers () {
                                 <div>
                                     <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
                                     <select
+                                        value={new Date(bookingData.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                                         onChange={(e) => {
-                                            handleStrechDateChange(e);
+                                            handleDateChange(e , 'time');
                                         }}
                                         className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
                                         {timeOptions.map((time) => (
