@@ -33,12 +33,22 @@ export default function Customers () {
     const [bookingUsers, setBookingUser] = useState<Users[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [customerBooking, setCustomerBooking] = useState<string | null>("");
+    const createTodayAtNine = () => {
+        const d = new Date();
+        d.setHours(9, 0, 0, 0); // JST 09:00
+      
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+      
+        return `${yyyy}-${mm}-${dd}T09:00:00`;
+    };
     const [bookingData, setBookingData] = useState<Booking>({
         id: '',
         name: '',
-        start: new Date().toISOString(), // 現在時刻
+        start: createTodayAtNine(), // 現在時刻
         stretchCourse: 40,
-        color: '仮予約'
+        color: '#f59e0b'
     })
     const [newCustomer, setNewCustomer] = useState({
         name: "",
@@ -858,7 +868,7 @@ export default function Customers () {
                                         }}
                                         className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
                                         {statusOptions.map((status) => (
-                                            <option key={status.label}>{status.label}</option>
+                                            <option key={status.label} value={status.color}>{status.label}</option>
                                         ))}
                                     </select>
                                 </div>
