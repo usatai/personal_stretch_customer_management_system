@@ -612,8 +612,7 @@ export default function Customers () {
                                                 {selectedCustomer.name.charAt(0)}
                                             </div>
                                             <div>
-                                                <h2 className="text-xl font-semibold text-white">顧客詳細情報</h2>
-                                                <p className="text-xs text-white/80 mt-0.5">{selectedCustomer.name}</p>
+                                                <h2 className="text-xl font-semibold text-white">{selectedCustomer.name}</h2>
                                             </div>
                                         </div>
                                         <button
