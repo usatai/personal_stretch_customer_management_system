@@ -589,6 +589,7 @@ export default function Customers () {
                     </div>
                 )}
 
+                {/* 顧客詳細画面 */}
                 {customerId && (() => {
                     const selectedCustomer = bookingUsers.find(c => c.id === customerId);
                     if (!selectedCustomer) return null;
@@ -639,7 +640,7 @@ export default function Customers () {
                                         <div className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
                                             <p className="text-xs text-gray-600 mb-0.5">初回来店日</p>
                                             <p className="text-base font-semibold text-gray-900">
-                                                {selectedCustomer.firstVisitDate ? formatDate(selectedCustomer.firstVisitDate) : 'データ未登録'}
+                                                {selectedCustomer.firstVisitDate ? formatDate(selectedCustomer.firstVisitDate) : '-'}
                                             </p>
                                         </div>
                                     </div>
@@ -690,7 +691,7 @@ export default function Customers () {
                                                 <div className="p-2.5 bg-blue-50 rounded-lg">
                                                     <p className="text-xs text-gray-600 mb-0.5">初回来店日</p>
                                                     <p className="text-sm font-semibold text-gray-900">
-                                                        {selectedCustomer.firstVisitDate ? formatDate(selectedCustomer.firstVisitDate) : 'データ未登録'}
+                                                        {selectedCustomer.firstVisitDate ? formatDate(selectedCustomer.firstVisitDate) : '-'}
                                                     </p>
                                                 </div>
 
