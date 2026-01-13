@@ -297,6 +297,8 @@ export default function Customers () {
         }
 
         console.log(response.body);
+
+        setCustomerBooking(null);
     }
 
     return (
