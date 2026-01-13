@@ -7,8 +7,10 @@ type Users = {
     phone: string;
     lastVisitDate: string; // YYYY-MM-DD
     firstVisitDate?: string; // YYYY-MM-DD 初回来店日
+    nextVisitDate?: string;
     visitCount: number;
     memo?: string;
+    createdAt: string;
 }
 
 // Propsの型定義
@@ -22,6 +24,26 @@ const formatDate = (dateString : string) => {
     if (!dateString) return '-'; 
     const date = new Date(dateString);
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+}
+
+// 平均間隔日数算出
+function calculateAverageVisitInterval(user: Users): number {
+    const { lastVisitDate, firstVisitDate, visitCount } = user;
+
+    if (!firstVisitDate || visitCount < 2) {
+        return 0;
+    }
+
+    const last = new Date(lastVisitDate).getTime();
+    const first = new Date(firstVisitDate).getTime();
+
+    const diffTime = last - first;
+
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    const averageInterval = diffDays / (visitCount - 1);
+
+    return Math.round(averageInterval * 10) / 10;
 }
 
 export const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onUpdate }) => {
@@ -207,8 +229,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose,
                                     </p>
                                 </div>
                                 <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-200">
-                                    <p className="text-xs text-gray-600 mb-1.5">予約履歴</p>
-                                    <p className="text-xs text-gray-500 italic">データ未実装</p>
+                                    <p className="text-xs text-gray-600 mb-1.5">次回予約日</p>
+                                    <p className="text-sm text-gray-600 font-semibold">{customer.nextVisitDate ? formatDate(customer.nextVisitDate) : '-'}</p>
                                 </div>
                             </div>
                         </div>
@@ -241,11 +263,11 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose,
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-200">
                                 <p className="text-xs text-gray-600 mb-0.5">顧客登録日</p>
-                                <p className="text-xs text-gray-500 italic">データ未実装</p>
+                                <p className="text-xs text-gray-500 italic">{customer.createdAt ? formatDate(customer.createdAt) : '-'}</p>
                             </div>
                             <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-200">
                                 <p className="text-xs text-gray-600 mb-0.5">平均来店間隔</p>
-                                <p className="text-xs text-gray-500 italic">データ未実装</p>
+                                <p className="text-xs text-gray-500 italic">{calculateAverageVisitInterval(customer)}日</p>
                             </div>
                         </div>
                     </div>

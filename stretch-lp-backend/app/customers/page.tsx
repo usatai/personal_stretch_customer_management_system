@@ -14,6 +14,7 @@ type Users = {
     firstVisitDate?: string; // YYYY-MM-DD 初回来店日
     visitCount: number;
     memo?: string;
+    createdAt: string;
 }
 
 type Booking = {
