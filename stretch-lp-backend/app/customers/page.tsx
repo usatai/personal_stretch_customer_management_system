@@ -510,9 +510,9 @@ export default function Customers () {
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* --- ヘッダー --- */}
-                            <div className="px-6 py-4 border-b bg-gray-50 rounded-t-xl">
-                                <h2 className="text-xl font-semibold text-gray-900">新規顧客登録</h2>
-                                <p className="text-sm text-gray-500 mt-1">必要な情報を入力してください（※名前のみ必須）</p>
+                            <div className="px-3 py-2 border-b bg-gradient-to-r from-cyan-500 to-blue-500 rounded-t-xl">
+                                <h2 className="text-xl font-semibold text-white">新規顧客登録</h2>
+                                <p className="text-sm text-white mt-1">必要な情報を入力してください（※名前のみ必須）</p>
                             </div>
 
                             {/* --- ボディ --- */}

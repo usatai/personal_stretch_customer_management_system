@@ -293,16 +293,16 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose,
                     ) : (
                         <>
                             <button
-                                onClick={onClose}
-                                className="px-3 py-1.5 text-xs font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
-                            >
-                                閉じる
-                            </button>
-                            <button
                                 onClick={() => setIsEditing(true)}
                                 className="px-4 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                             >
                                 編集
+                            </button>
+                            <button
+                                onClick={onClose}
+                                className="px-3 py-1.5 text-xs font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                            >
+                                閉じる
                             </button>
                         </>
                     )}
