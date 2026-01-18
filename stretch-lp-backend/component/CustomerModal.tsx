@@ -277,17 +277,17 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose,
                 <div className="flex-shrink-0 px-4 py-3 border-t bg-gray-50 flex justify-end gap-2 rounded-b-xl">
                     {isEditing ? (
                         <>
-                             <button
-                                onClick={handleCancel}
-                                className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                キャンセル
-                            </button>
                             <button
                                 onClick={handleSave}
                                 className="px-4 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
                             >
                                 保存する
+                            </button>
+                            <button
+                                onClick={handleCancel}
+                                className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                キャンセル
                             </button>
                         </>
                     ) : (

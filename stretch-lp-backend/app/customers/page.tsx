@@ -34,6 +34,7 @@ export default function Customers () {
     const [customerId,setCustomerId] = useState<string | null>("");
     const [bookingUsers, setBookingUser] = useState<Users[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState(null);
     const [customerBooking, setCustomerBooking] = useState<string | null>("");
     const createTodayAtNine = () => {
         const d = new Date();
@@ -254,6 +255,8 @@ export default function Customers () {
             console.error("ユーザーの保存に失敗しました");
         }
 
+        const data = await response.json();
+
         console.log("登録成功");
         await getBookingUser();
 
@@ -264,6 +267,14 @@ export default function Customers () {
             memo: ""
         });
         setIsCreateModalOpen(false);
+
+        // バックエンドからのメッセージを管理
+        setSuccessMessage(data.success);
+
+        // 3秒後に消す
+        setTimeout(() => {
+            setSuccessMessage(null);
+        }, 3000);
     }
 
     useEffect(() => {
@@ -298,11 +309,20 @@ export default function Customers () {
 
         console.log(response.body);
 
+
         setCustomerBooking(null);
     }
 
     return (
         <>
+            <div
+                className={`fixed left-0 top-0 z-50 flex w-full items-center justify-center bg-green-500 py-3 text-white shadow-md transition-transform duration-500 ease-in-out ${
+                    successMessage ? 'translate-y-0' : '-translate-y-full'
+                }`}
+            >
+                {/* アイコンなどを入れてもOK */}
+                <span className="font-bold">✅ {successMessage}</span>
+            </div>
             <div className="relative min-h-screen bg-gray-50 md:flex">
                 {/* オーバーレイ（モバイル時サイドバー開時のみ） */}
                 {sidebarOpen && (

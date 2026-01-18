@@ -808,8 +808,8 @@ export default function BookingsWithDragDrop() {
                                 className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 text-gray-900"
                             >
                                 {/* --- ヘッダー --- */}
-                                <div className="flex justify-between items-center p-4 border-b border-gray-200">
-                                    <h3 className="text-lg font-semibold">
+                                <div className="flex justify-between items-center p-4 border-b bg-gradient-to-r from-cyan-500 to-blue-500">
+                                    <h3 className="text-lg font-semibold text-white">
                                         予約詳細
                                     </h3>
                                     <button
