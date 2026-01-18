@@ -58,7 +58,7 @@ export default function Settings() {
                     <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         <SettingCard 
                             title="ユーザー管理" 
-                            description="ログインできるユーザーの情報を管理"
+                            description="管理者ユーザーの作成やユーザーの情報を管理"
                         >
                         <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
                             ユーザー管理設定へ
@@ -67,7 +67,7 @@ export default function Settings() {
 
                         <SettingCard 
                             title="権限設定（ロール管理）" 
-                            description="登録したユーザーの権限を設定できます"
+                            description="登録した管理者ユーザーの権限を設定できます"
                         >
                         <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
                             詳細なプライバシー設定へ
@@ -81,15 +81,6 @@ export default function Settings() {
                         <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
                             詳細なプライバシー設定へ
                         </a>
-                        </SettingCard>
-
-                        <SettingCard 
-                            title="支払い情報" 
-                            description="登録済みのクレジットカード情報を管理します。"
-                        >
-                        <button className="w-full rounded-lg bg-indigo-500 py-2 text-white transition duration-150 hover:bg-indigo-600">
-                            支払い方法を追加
-                        </button>
                         </SettingCard>
                     </div>
                 </div>

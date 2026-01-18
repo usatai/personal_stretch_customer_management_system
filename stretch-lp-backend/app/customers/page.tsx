@@ -639,10 +639,17 @@ export default function Customers () {
                             setBookingUser(prev => prev.map(user => 
                                 user.id === updatedData.id ? updatedData : user
                             ));
+
+                            const data = await response.json();
+                            setSuccessMessage(data.success);
                     
                             // 成功した時だけモーダルを閉じる
                             setCustomerId(null);
 
+                            // 3秒後に消す
+                            setTimeout(() => {
+                                setSuccessMessage(null);
+                            }, 3000);
                         } else {
                             console.error("更新失敗");
                             // エラーメッセージを表示するなど

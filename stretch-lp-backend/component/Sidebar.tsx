@@ -1,7 +1,11 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { apiClient } from '../utils/apiClient';
+
 const menuItems = [
     { label: '予約一覧', href: '/bookings' },
     { label: '顧客管理', href: '/customers' },
-    // { label: 'スケジュール', href: '/schedule' },
     { label: '設定', href: '/settings' },
     { label: 'ログアウト', href: '/logout' },
 ];
@@ -11,6 +15,24 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ onClose }: SidebarProps) {
+    const router = useRouter();
+
+    // ログアウト処理
+    const handleLogout = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault();
+
+        try {
+            const response = await apiClient('/logout', {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                router.push('/');
+            }
+        } catch (e) {
+            console.error('ログアウトエラー:', e);
+        }
+    };
     return (
         <aside className="h-full w-full bg-slate-600 text-white px-5 py-8 flex flex-col">
 
@@ -35,6 +57,13 @@ export default function Sidebar({ onClose }: SidebarProps) {
                     <a
                         key={item.href}
                         href={item.href}
+                        onClick={(e) => {
+                            if (item.href == '/logout') {
+                                handleLogout(e);
+                            } else {
+                                if(onClose) onClose();
+                            }
+                        }}
                         className="block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-200"
                     >
                         {item.label}
