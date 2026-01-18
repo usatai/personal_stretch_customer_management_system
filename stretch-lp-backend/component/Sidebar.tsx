@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { apiClient } from '../utils/apiClient';
+import Link from 'next/link';
 
 const menuItems = [
     { label: '予約一覧', href: '/bookings' },
@@ -54,7 +55,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
             <nav className="flex-1 space-y-1">
                 {menuItems.map(item => (
-                    <a
+                    <Link
                         key={item.href}
                         href={item.href}
                         onClick={(e) => {
@@ -67,7 +68,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                         className="block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-200"
                     >
                         {item.label}
-                    </a>
+                    </Link>
                 ))}
             </nav>
 

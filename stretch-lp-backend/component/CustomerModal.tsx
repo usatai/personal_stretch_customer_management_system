@@ -126,18 +126,18 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose,
                     {/* 統計情報カード（編集不可エリア） */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div className="p-3 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg border border-cyan-200">
-                            <p className="text-xs text-gray-600 mb-0.5">来店回数</p>
+                            <p className="text-xs text-gray-600 mb-0.5">累計来店回数</p>
                             <p className="text-2xl font-bold text-cyan-600">{customer.visitCount}回</p>
-                        </div>
-                        <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                            <p className="text-xs text-gray-600 mb-0.5">最終来店日</p>
-                            <p className="text-base font-semibold text-gray-900">{formatDate(customer.lastVisitDate)}</p>
                         </div>
                         <div className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
                             <p className="text-xs text-gray-600 mb-0.5">初回来店日</p>
                             <p className="text-base font-semibold text-gray-900">
                                 {customer.firstVisitDate ? formatDate(customer.firstVisitDate) : '-'}
                             </p>
+                        </div>
+                        <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                            <p className="text-xs text-gray-600 mb-0.5">最終来店日</p>
+                            <p className="text-base font-semibold text-gray-900">{formatDate(customer.lastVisitDate)}</p>
                         </div>
                     </div>
 

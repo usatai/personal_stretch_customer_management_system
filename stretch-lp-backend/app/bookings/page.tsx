@@ -85,10 +85,8 @@ export default function BookingsWithDragDrop() {
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [didDrag, setDidDrag] = useState(false);
     const [clientData, setClientData] = useState<CalendarEvent[]>([]);
-    const [bookingRegister, setBookingRegister] = useState<boolean>(false);
     const scheduleRef = useRef<HTMLDivElement>(null);
     const suppressRegisterRef = useRef(false);
-    const dateInputRef = useRef<HTMLInputElement>(null);
     const calendarButtonRef = useRef<HTMLButtonElement>(null);
     const calendarRef = useRef<HTMLDivElement>(null);
     const [calendarOpen, setCalendarOpen] = useState(false);
@@ -272,10 +270,8 @@ export default function BookingsWithDragDrop() {
                         );
                     });
                 }
-                setBookingRegister(false);
             }
         } else {
-            setBookingRegister(false);
             setSelectedBooking(draggedBooking); // 表示する予約データをセット
         }
     
@@ -411,7 +407,7 @@ export default function BookingsWithDragDrop() {
             suppressRegisterRef.current = false;
             return;
         }
-        setBookingRegister(true);
+        // setBookingRegister(true);
     }
 
     return (
@@ -661,7 +657,7 @@ export default function BookingsWithDragDrop() {
                                 </div>
 
                                 {/* スケジュール列 */}
-                                <div className="relative" ref={scheduleRef} onClick={handleBookingRegister}>
+                                <div className="relative" ref={scheduleRef}>
                                     {/* 背景のタイムスロット */}
                                     <div>
                                         {timeSlots.map((slot, idx) => (
