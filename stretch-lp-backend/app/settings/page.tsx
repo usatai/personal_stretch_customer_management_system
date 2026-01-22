@@ -60,7 +60,7 @@ export default function Settings() {
                             title="ユーザー管理" 
                             description="管理者ユーザーの作成やユーザーの情報を管理"
                         >
-                        <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
+                        <a href="/userSetting" className="text-sm text-blue-600 hover:text-blue-800">
                             ユーザー管理設定へ
                         </a>
                         </SettingCard>
