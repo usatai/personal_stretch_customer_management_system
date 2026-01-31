@@ -23,12 +23,12 @@ export default function UserSetting() {
     const [newTrainer, setNewTrainer] = useState({
         adminName: "",
         adminPassword: "",
-        email: ""
+        role: ""
     });
     const [editTrainer, setEditTrainer] = useState({
         adminName: "",
         adminPassword: "",
-        email: ""
+        role: ""
     });
 
     // トレーナー一覧取得
@@ -95,7 +95,7 @@ export default function UserSetting() {
                 body: JSON.stringify({
                     adminName: newTrainer.adminName,
                     adminPassword: newTrainer.adminPassword,
-                    email: newTrainer.email || undefined
+                    email: newTrainer.role || undefined
                 }),
             });
 
@@ -112,7 +112,7 @@ export default function UserSetting() {
             setNewTrainer({
                 adminName: "",
                 adminPassword: "",
-                email: ""
+                role: ""
             });
             setIsCreateModalOpen(false);
 
@@ -144,8 +144,8 @@ export default function UserSetting() {
                 updateData.adminPassword = editTrainer.adminPassword;
             }
 
-            if (editTrainer.email !== undefined) {
-                updateData.email = editTrainer.email;
+            if (editTrainer.role !== undefined) {
+                updateData.email = editTrainer.role;
             }
 
             const response = await apiClient("/updateAdminUser", {
@@ -212,7 +212,7 @@ export default function UserSetting() {
         setEditTrainer({
             adminName: trainer.adminName,
             adminPassword: "",
-            email: trainer.role || ""
+            role: trainer.role || ""
         });
         setIsEditModalOpen(true);
     }
@@ -403,18 +403,20 @@ export default function UserSetting() {
                                     />
                                 </div>
 
-                                {/* メール */}
+                                {/* ロール */}
                                 <div>
-                                    <h4 className="text-sm font-medium text-gray-500">メール（任意）</h4>
-                                    <input
-                                        type="email"
-                                        placeholder="例: trainer@example.com"
-                                        value={newTrainer.email}
+                                    <h4 className="text-sm font-medium text-gray-500">権限（必須）</h4>
+                                    <select
+                                        value={newTrainer.role}
                                         onChange={(e) =>
-                                            setNewTrainer({ ...newTrainer, email: e.target.value })
+                                            setNewTrainer({ ...newTrainer, role: e.target.value })
                                         }
                                         className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150"
-                                    />
+                                    >
+                                        <option value="">選択してください</option>
+                                        <option value="管理者">管理者</option>
+                                        <option value="一般">一般</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -483,6 +485,22 @@ export default function UserSetting() {
                                         }
                                         className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150"
                                     />
+                                </div>
+
+                                {/* 権限 */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-500">権限（必須）</h4>
+                                    <select
+                                        value={editTrainer.role}
+                                        onChange={(e) =>
+                                            setEditTrainer({ ...editTrainer, role: e.target.value })
+                                        }
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150"
+                                    >
+                                        <option value="">選択してください</option>
+                                        <option value="管理者">管理者</option>
+                                        <option value="一般">一般</option>
+                                    </select>
                                 </div>
 
                             </div>
