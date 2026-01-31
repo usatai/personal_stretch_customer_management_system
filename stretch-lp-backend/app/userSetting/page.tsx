@@ -8,7 +8,7 @@ type Trainer = {
     id: string;
     adminName: string;
     adminPassword?: string; // 表示時は非表示
-    role?: string;
+    role_id?: string;
     createdAt: string;
 }
 
@@ -23,12 +23,12 @@ export default function UserSetting() {
     const [newTrainer, setNewTrainer] = useState({
         adminName: "",
         adminPassword: "",
-        role: ""
+        role_id: ""
     });
     const [editTrainer, setEditTrainer] = useState({
         adminName: "",
         adminPassword: "",
-        role: ""
+        role_id: ""
     });
 
     // トレーナー一覧取得
@@ -64,7 +64,7 @@ export default function UserSetting() {
             const query = searchQuery.toLowerCase();
             filtered = filtered.filter(trainer => 
                 trainer.adminName.toLowerCase().includes(query) ||
-                (trainer.role && trainer.role.toLowerCase().includes(query))
+                (trainer.role_id && trainer.role_id.toLowerCase().includes(query))
             );
         }
 
@@ -90,12 +90,12 @@ export default function UserSetting() {
         }
 
         try {
-            const response = await apiClient("/createAdminUser", {
+            const response = await apiClient("/setTrainers", {
                 method: "POST",
                 body: JSON.stringify({
                     adminName: newTrainer.adminName,
                     adminPassword: newTrainer.adminPassword,
-                    email: newTrainer.role || undefined
+                    role_id: newTrainer.role_id || undefined
                 }),
             });
 
@@ -112,7 +112,7 @@ export default function UserSetting() {
             setNewTrainer({
                 adminName: "",
                 adminPassword: "",
-                role: ""
+                role_id: ""
             });
             setIsCreateModalOpen(false);
 
@@ -144,8 +144,8 @@ export default function UserSetting() {
                 updateData.adminPassword = editTrainer.adminPassword;
             }
 
-            if (editTrainer.role !== undefined) {
-                updateData.email = editTrainer.role;
+            if (editTrainer.role_id !== undefined) {
+                updateData.email = editTrainer.role_id;
             }
 
             const response = await apiClient("/updateAdminUser", {
@@ -182,10 +182,11 @@ export default function UserSetting() {
             return;
         }
 
+        console.log(trainerId);
+
         try {
-            const response = await apiClient("/deleteAdminUser", {
+            const response = await apiClient(`/trainers/${trainerId}`, {
                 method: "DELETE",
-                body: JSON.stringify({ id: trainerId }),
             });
 
             if (!response.ok) {
@@ -212,7 +213,7 @@ export default function UserSetting() {
         setEditTrainer({
             adminName: trainer.adminName,
             adminPassword: "",
-            role: trainer.role || ""
+            role_id: trainer.role_id || ""
         });
         setIsEditModalOpen(true);
     }
@@ -316,12 +317,12 @@ export default function UserSetting() {
                                         <div className="p-4 space-y-3">
                                             {/* 基本情報 */}
                                             <div className="space-y-2 text-sm">
-                                                {trainer.role && (
+                                                {trainer.role_id && (
                                                     <div className="flex items-center gap-2 text-gray-700">
                                                         <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                         </svg>
-                                                        <span className="truncate">{trainer.role}</span>
+                                                        <span className="truncate">{trainer.role_id}</span>
                                                     </div>
                                                 )}
                                                 <div className="flex items-center gap-2 text-gray-700">
@@ -407,15 +408,15 @@ export default function UserSetting() {
                                 <div>
                                     <h4 className="text-sm font-medium text-gray-500">権限（必須）</h4>
                                     <select
-                                        value={newTrainer.role}
+                                        value={newTrainer.role_id}
                                         onChange={(e) =>
-                                            setNewTrainer({ ...newTrainer, role: e.target.value })
+                                            setNewTrainer({ ...newTrainer, role_id: e.target.value })
                                         }
                                         className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150"
                                     >
                                         <option value="">選択してください</option>
-                                        <option value="管理者">管理者</option>
-                                        <option value="一般">一般</option>
+                                        <option value="1">管理者</option>
+                                        <option value="2">一般</option>
                                     </select>
                                 </div>
                             </div>
@@ -491,15 +492,15 @@ export default function UserSetting() {
                                 <div>
                                     <h4 className="text-sm font-medium text-gray-500">権限（必須）</h4>
                                     <select
-                                        value={editTrainer.role}
+                                        value={editTrainer.role_id}
                                         onChange={(e) =>
-                                            setEditTrainer({ ...editTrainer, role: e.target.value })
+                                            setEditTrainer({ ...editTrainer, role_id: e.target.value })
                                         }
                                         className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition duration-150"
                                     >
                                         <option value="">選択してください</option>
-                                        <option value="管理者">管理者</option>
-                                        <option value="一般">一般</option>
+                                        <option value="1">管理者</option>
+                                        <option value="2">一般</option>
                                     </select>
                                 </div>
 
