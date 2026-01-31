@@ -2,9 +2,12 @@
 
 import Sidebar from "@/component/Sidebar";
 import { apiClient } from "@/utils/apiClient";
-import { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { BackendBooking, CalendarEvent } from "../types";
 import { convertToCalendarEvents } from "@/utils/bookingExchange";
+import { NotificationCenter } from "@/component/NotificationCenter";
+import { useNotifications } from '@/component/useNotifications';
+import { startOfDay, addDays, isSameDay, formatYMD } from '@/utils/dateUtils';
 
 type Booking = {
     id: string;
@@ -29,25 +32,6 @@ function generateTimeSlots(startHour: number, endHour: number) {
     return slots;
 }
 
-function startOfDay(date: Date) {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
-function addDays(date: Date, days: number) {
-    const d = new Date(date);
-    d.setDate(d.getDate() + days);
-    return d;
-}
-
-function formatYMD(date: Date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-}
-
 function getDaysInMonth(date: Date) {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 }
@@ -60,12 +44,6 @@ function formatMonthYear(date: Date) {
     const y = date.getFullYear();
     const m = date.getMonth() + 1;
     return `${y}年${m}月`;
-}
-
-function isSameDay(date1: Date, date2: Date) {
-    return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
 }
 
 function isToday(date: Date) {
@@ -96,6 +74,9 @@ export default function BookingsWithDragDrop() {
     const endHour = 22;
     const timeSlots = useMemo(() => generateTimeSlots(startHour, endHour), [startHour, endHour]);
     const totalRows = useMemo(() => (endHour - startHour) * 2 + 1, [startHour, endHour]);
+
+    // 通知機能
+    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(bookingsState);
 
 
     const fetchBookings = async () => {
@@ -407,7 +388,6 @@ export default function BookingsWithDragDrop() {
             suppressRegisterRef.current = false;
             return;
         }
-        // setBookingRegister(true);
     }
 
     return (
@@ -613,12 +593,18 @@ export default function BookingsWithDragDrop() {
                                         </div>
                                     )}
                                 </div>
-                                <button
-                                    className="px-3 py-2 rounded-lg border border-cyan-200 bg-white hover:bg-cyan-50 text-cyan-700 text-sm"
-                                    onClick={() => setCurrentDate(startOfDay(new Date()))}
-                                >
-                                    今日
-                                </button>
+
+                                <NotificationCenter 
+                                    notifications={notifications}
+                                    unreadCount={unreadCount}
+                                    onMarkAsRead={markAsRead}
+                                    onMarkAllAsRead={markAllAsRead}
+                                    onSelectBooking={(id) => {
+                                        // 予約IDから該当の予約を探してセットする処理
+                                        const target = bookingsState.find(b => b.id === id);
+                                        if(target) setSelectedBooking(target);
+                                    }}
+                                />
                             </div>
                             
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center justify-end">
