@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { startOfDay, addDays, isSameDay } from '@/utils/dateUtils';
 
 export type Notification = {
@@ -89,6 +89,13 @@ export const useNotifications = (bookings: Booking[]) => {
             });
         });
     }, []);
+
+    // ★ これがないと、通知生成処理が走りません！
+    useEffect(() => {
+        if (bookings.length > 0) {
+            generateNotifications(bookings);
+        }
+    }, [bookings, generateNotifications]);
 
     // 通知を既読にする
     const markAsRead = (notificationId: string) => {

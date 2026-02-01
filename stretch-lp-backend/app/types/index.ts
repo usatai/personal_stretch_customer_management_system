@@ -39,3 +39,12 @@ export type DetailBackendBooking = {
     createdAt: string;
     choiseStretch: number;
 };
+
+export type Booking = {
+    id: string;
+    title: string;
+    start: string;
+    end: string;
+    stretchCourse: number;
+    color?: string;
+};
