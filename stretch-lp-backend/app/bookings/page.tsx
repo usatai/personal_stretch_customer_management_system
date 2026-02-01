@@ -1,55 +1,14 @@
 'use client'
 
 import Sidebar from "@/component/Sidebar";
+import { BookingDetailModal } from "@/component/BookingDetailModal";
 import { apiClient } from "@/utils/apiClient";
 import { useMemo, useState, useRef, useEffect } from "react";
-import { BackendBooking, CalendarEvent } from "../types";
+import { BackendBooking, CalendarEvent, Booking} from "../types";
 import { convertToCalendarEvents } from "@/utils/bookingExchange";
 import { NotificationCenter } from "@/component/NotificationCenter";
 import { useNotifications } from '@/component/useNotifications';
-import { startOfDay, addDays, isSameDay, formatYMD } from '@/utils/dateUtils';
-
-type Booking = {
-    id: string;
-    title: string;
-    start: string;
-    end: string;
-    stretchCourse: number;
-    color?: string;
-};
-
-function generateTimeSlots(startHour: number, endHour: number) {
-    const slots: { label: string; minutes: number }[] = [];
-    for (let h = startHour; h <= endHour; h++) {
-        for (let m of [0, 30]) {
-            if (h === endHour && m > 0) break;
-            slots.push({
-                label: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
-                minutes: (h * 60) + m
-            });
-        }
-    }
-    return slots;
-}
-
-function getDaysInMonth(date: Date) {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-}
-
-function getFirstDayOfMonth(date: Date) {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-}
-
-function formatMonthYear(date: Date) {
-    const y = date.getFullYear();
-    const m = date.getMonth() + 1;
-    return `${y}年${m}月`;
-}
-
-function isToday(date: Date) {
-    const today = startOfDay(new Date());
-    return isSameDay(date, today);
-}
+import { startOfDay, addDays, isSameDay, formatYMD, generateTimeSlots, getDaysInMonth, getFirstDayOfMonth, formatMonthYear, isToday} from '@/utils/dateUtils';
 
 export default function BookingsWithDragDrop() {
     const [currentDate, setCurrentDate] = useState<Date>(startOfDay(new Date()));
@@ -74,10 +33,6 @@ export default function BookingsWithDragDrop() {
     const endHour = 22;
     const timeSlots = useMemo(() => generateTimeSlots(startHour, endHour), [startHour, endHour]);
     const totalRows = useMemo(() => (endHour - startHour) * 2 + 1, [startHour, endHour]);
-
-    // 通知機能
-    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(bookingsState);
-
 
     const fetchBookings = async () => {
         try {
@@ -128,6 +83,9 @@ export default function BookingsWithDragDrop() {
     }, [calendarOpen]);
 
     const bookings = bookingsState.length > 0 ? bookingsState : clientData;
+
+    // 通知機能
+    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(bookings);
 
     const getBookingGridPlacement = (booking: Booking) => {
         const start = new Date(booking.start);
@@ -263,102 +221,12 @@ export default function BookingsWithDragDrop() {
         setDidDrag(false);
     };
 
-    const statusOptions = [
-        { label: "仮予約", color: "#f59e0b" },
-        { label: "予約確定", color: "#3b82f6" },
-        { label: "完了", color: "#22c55e" },
-        { label: "キャンセル", color: "#ef4444" },
-    ];
-
-    const statusCourse = [
-        { course: "40分", value: 40 },
-        { course: "60分", value: 60 },
-        { course: "80分", value: 80 },
-    ];
-    
-    const getSortedStatusOptions = (color : string) => {
-        return statusOptions.slice().sort((a,b) => {
-            if (a.color === color) return -1; 
-            if (b.color === color) return 1;
-            return 0;
-        });
-    };
-
-    const generateTimeOptions = () => {
-        const times: string[] = [];
-        for (let h = 9; h < 21; h++) {
-          for (let m = 0; m < 60; m+=30) {
-            const hh = h.toString().padStart(2, '0');
-            const mm = m.toString().padStart(2, '0');
-            times.push(`${hh}:${mm}`);
-          }
-        }
-        return times;
-      };
-    
-    const timeOptions = generateTimeOptions();
-
-    // selectが変わった時のハンドラ
-    // BookingsWithDragDrop コンポーネント内
-
-    const handleDateChange = (e: React.ChangeEvent<HTMLSelectElement>, booking: Booking, part: string) => {
-        if (!selectedBooking) return;
-        
-        // 現在の開始日時をDateオブジェクトとして取得
-        const currentStart = new Date(selectedBooking.start);
-        let newStart = new Date(currentStart);
-        
-        const newValue = Number(e.target.value);
-
-        // 1. Dateオブジェクト内の日時を設定
-        if (part === 'year') {
-            newStart.setFullYear(newValue);
-        } else if (part === 'month') {
-            newStart.setMonth(newValue - 1);
-        } else if (part === 'day') {
-            newStart.setDate(newValue);
-        } else if (part === 'time') {
-            const [hours, minutes] = e.target.value.split(':').map(Number);
-            // 時と分をローカル時刻として設定
-            newStart.setHours(hours, minutes, 0, 0); 
-        }
-        // 2. ローカル時刻を保ったまま、ZなしのISO形式の文字列に変換
-
-        // Dateオブジェクトから各要素を取得し、2桁にパディング
-        const year = newStart.getFullYear();
-        const month = String(newStart.getMonth() + 1).padStart(2, '0');
-        const day = String(newStart.getDate()).padStart(2, '0');
-        const hour = String(newStart.getHours()).padStart(2, '0');
-        const minute = String(newStart.getMinutes()).padStart(2, '0');
-        const second = '00'; // 秒は固定で00
-        
-        // YYYY-MM-DDTHH:MM:SS 形式の文字列を作成
-        const localIsoString = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
-        
-        // 3. selectedBooking State を更新
-        setSelectedBooking({ 
-            ...selectedBooking, 
-            start: localIsoString
-        });
-    };
-
-    const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>, booking: Booking) => {
-        if (!selectedBooking) return;
-        setSelectedBooking({ ...selectedBooking, stretchCourse: Number(e.target.value) });
-    };
-
-    const handleColorStatusChange = (e: React.ChangeEvent<HTMLSelectElement>, booking: Booking) => {
-        if (!selectedBooking) return;
-        setSelectedBooking({ ...selectedBooking, color: e.target.value });
-    };
-
     // 顧客詳細情報変更
     const changeBooking = async (draggedBooking?: Booking) => {
         const bookingToUpdate = draggedBooking || selectedBooking;
 
         console.log(bookingToUpdate);
         const numericId = Number(bookingToUpdate?.id.replace('b', ''));
-        // IDが変換できない（数値以外が含まれるなど）場合はエラーチェックを入れるとより安全です。
         if (isNaN(numericId)) {
             throw new Error("予約IDの形式が不正です。");
         }
@@ -376,17 +244,9 @@ export default function BookingsWithDragDrop() {
         if (response.ok) {
             console.log("更新成功");
             await fetchBookings();
+            setSelectedBooking(null);
         } else {
             console.error("更新失敗");
-        }
-
-        setSelectedBooking(null);
-    }
-
-    const handleBookingRegister = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (suppressRegisterRef.current || isDragging) {
-            suppressRegisterRef.current = false;
-            return;
         }
     }
 
@@ -773,159 +633,15 @@ export default function BookingsWithDragDrop() {
 
                     {/* 予約詳細画面作成 */}
                     {selectedBooking && (
-                        <div
-                            // 1. オーバーレイ (背景)
-                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-                            // オーバーレイクリックで閉じる
-                            onClick={() => {
-                                // setIsDetailModalOpen(false);
-                                setSelectedBooking(null);
-                            }}
-                        >
-                            {/* 2. モーダルパネル (コンテンツ本体) */}
-                            <div
-                                // モーダル内部のクリックが、背景のonClickに伝播(バブリング)するのを防ぐ
-                                onClick={(e) => e.stopPropagation()} 
-                                // モーダルのスタイル (白背景、角丸、影、サイズ)
-                                className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 text-gray-900"
-                            >
-                                {/* --- ヘッダー --- */}
-                                <div className="flex justify-between items-center p-4 border-b bg-gradient-to-r from-cyan-500 to-blue-500">
-                                    <h3 className="text-lg font-semibold text-white">
-                                        予約詳細
-                                    </h3>
-                                    <button
-                                        onClick={() => {
-                                            // setIsDetailModalOpen(false);
-                                            setSelectedBooking(null);
-                                        }}
-                                        className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
-                                    >
-                                        {/* Xボタン (Heroiconsより) */}
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-                    
-                                {/* --- ボディ --- */}
-                                <div className="p-6 space-y-4">
-                                    {/* 予約タイトル */}
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-500">名前</h4>
-                                        <p className="text-lg">{selectedBooking.title || '（タイトルなし）'}</p>
-                                    </div>
-                                    
-                                    {/* 日時 */}
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-500">日時</h4>
-                                        <p className="text-lg">
-                                            <select 
-                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150"
-                                                value={new Date(selectedBooking.start).getFullYear()} onChange={(e) => handleDateChange(e,selectedBooking,'year')}>
-                                                <option value="2024">2024</option>
-                                                <option value="2025">2025</option>
-                                                <option value="2026">2026</option>
-                                            </select>
-                                            {' 年 '}
-                                            <select
-                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150" 
-                                                value={new Date(selectedBooking.start).getMonth() + 1} onChange={(e) => handleDateChange(e,selectedBooking,'month')}>
-                                                {[...Array(12)].map((_, i) => (
-                                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
-                                                ))}
-                                            </select>
-                                            {' 月 '}
-
-                                            <select
-                                                className="px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150" 
-                                                value={new Date(selectedBooking.start).getDate()} onChange={(e) => handleDateChange(e,selectedBooking,'day')}>
-                                                {[...Array(31)].map((_, i) => (
-                                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
-                                                ))}
-                                            </select>
-                                            {' 日 '}
-                                        </p>
-                                        <h4 className="text-sm font-medium text-gray-500 mt-3">ストレッチ開始時刻</h4>
-                                        <p className="text-lg font-mono">
-                                            {/* 時間のフォーマット */}
-                                            <select
-                                                className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150" 
-                                                value={new Date(selectedBooking.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} onChange={(e) => handleDateChange(e,selectedBooking,'time')}>
-                                                {timeOptions.map((time) => (
-                                                <option key={time} value={time}>
-                                                    {time}
-                                                </option>
-                                                ))}
-                                            </select>
-                                        </p>
-                                        <h4 className="text-sm font-medium text-gray-500 mt-3">コース</h4>
-                                        <p className="text-lg font-mono">
-                                            {/* 時間のフォーマット */}
-                                            <select
-                                                className="w-75 px-1 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150" 
-                                                value={selectedBooking.stretchCourse} onChange={(e) => handleCourseChange(e,selectedBooking)}>
-                                                {statusCourse.map((data) => (
-                                                <option key={data.course} value={data.value}>
-                                                    {data.course}
-                                                </option>
-                                                ))}
-                                            </select>
-                                        </p>
-                                    </div>
-                                    
-                                    {/* ここに他の情報を追加できます (例: 担当者、メモなど) */}
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-500">ステータス</h4>
-                                        <select 
-                                            value={selectedBooking.color}
-                                            onChange={(e) => {
-                                                handleColorStatusChange(e,selectedBooking)
-                                            }}
-                                            className="w-75 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 transition duration-150">
-                                            {getSortedStatusOptions(selectedBooking.color!).map(opt => (
-                                                <option key={opt.color} value={opt.color}>
-                                                    {opt.label}
-                                                </option>
-                                            ))}      
-                                        </select>
-                                    </div>
-                                
-                                </div>
-                    
-                                {/* --- フッター --- */}
-                                <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                                    {/* 削除ボタン (左寄せ) */}
-                                    <button
-                                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-gray-300 rounded-lg hover:bg-red-700"
-                                        onClick={() => {
-                                            alert(`ID: ${selectedBooking.id} を削除します`);
-                                            setSelectedBooking(null);
-                                        }}
-                                    >
-                                        削除
-                                    </button>
-                                    
-                                    {/* 閉じる・編集ボタン (右寄せ) */}
-                                    <div className="space-x-3">
-                                        <button
-                                            className="px-4 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-lg hover:bg-green-700"
-                                            onClick={() => changeBooking()}
-                                        >
-                                            変更
-                                        </button>
-                                        <button
-                                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                                            onClick={() => {
-                                                setSelectedBooking(null);
-                                            }}
-                                        >
-                                            閉じる
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <BookingDetailModal
+                            booking={selectedBooking} 
+                            onClose={() => setSelectedBooking(null)}
+                            onDelete={() => { /* 削除ロジック */ }}
+                            
+                            // ★ ここで渡す！
+                            // モーダルから「編集後のデータ(updated)」が返ってくるので、それを changeBooking に渡す
+                            onSave={(updatedBooking : Booking) => changeBooking(updatedBooking)}
+                        />
                     )}
                 </div>
             </div>
