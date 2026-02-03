@@ -48,3 +48,22 @@ export type Booking = {
     stretchCourse: number;
     color?: string;
 };
+
+export type Notification = {
+    id: number;
+    bookingId: number;
+    bookingTitle: string;
+    notificationType: string;
+    status: string;
+    message: string;
+    isRead: boolean;
+    createdAt: string;
+};
+
+//　Long id,
+// Long bookingId,
+// String bookingTitle,
+// NotificationType notificationType, // NEW, CANCEL, REMINDER
+// String message,
+// boolean isRead,
+// LocalDateTime createdAt

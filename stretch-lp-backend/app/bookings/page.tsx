@@ -4,7 +4,7 @@ import Sidebar from "@/component/Sidebar";
 import { BookingDetailModal } from "@/component/BookingDetailModal";
 import { apiClient } from "@/utils/apiClient";
 import { useMemo, useState, useRef, useEffect } from "react";
-import { BackendBooking, CalendarEvent, Booking} from "../types";
+import { BackendBooking, CalendarEvent, Booking, Notification} from "../types";
 import { convertToCalendarEvents } from "@/utils/bookingExchange";
 import { NotificationCenter } from "@/component/NotificationCenter";
 import { useNotifications } from '@/component/useNotifications';
@@ -85,7 +85,7 @@ export default function BookingsWithDragDrop() {
     const bookings = bookingsState.length > 0 ? bookingsState : clientData;
 
     // 通知機能
-    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(bookings);
+    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
     const getBookingGridPlacement = (booking: Booking) => {
         const start = new Date(booking.start);

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { startOfDay, addDays, isSameDay } from '@/utils/dateUtils';
+import { apiClient } from '@/utils/apiClient';
 
 export type Notification = {
     id: string;
@@ -11,105 +11,88 @@ export type Notification = {
     isRead: boolean;
 };
 
-type Booking = {
-    id: string;
-    title: string;
-    start: string;
-    end: string;
-    stretchCourse: number;
-    color?: string;
+// APIから返ってくる生のデータ型（JavaのDTOと一致させる）
+type BackendNotificationDto = {
+    id: number;
+    bookingId: number;
+    bookingTitle: string;
+    notificationType: 'NEW' | 'CANCEL' | 'TODAY' | 'TOMORROW'; // JavaのEnum文字列
+    message: string;
+    isRead: boolean;
+    createdAt: string;
 };
 
-export const useNotifications = (bookings: Booking[]) => {
+type NotificationApiResponse = {
+    notifications: BackendNotificationDto[];
+};
+
+export const useNotifications = () => {
 
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
-    // 通知を生成する関数
-    const generateNotifications = useCallback((bookings: Booking[]) => {
-        const now = new Date();
-        const today = startOfDay(now);
-        const tomorrow = addDays(today, 1);
-        const newNotifications: Notification[] = [];
+        // 1. APIから通知を取得する関数
+        const fetchNotifications = useCallback(async () => {
+            try {
+                const response = await apiClient("/notification"); // "/api/notifications" かもしれません
 
-        bookings.forEach((booking) => {
-            const bookingStart = new Date(booking.start);
-            const bookingDate = startOfDay(bookingStart);
-            const hoursUntilStart = (bookingStart.getTime() - now.getTime()) / (1000 * 60 * 60);
+                if (response.ok) {
+                    const responseData = await response.json() as NotificationApiResponse;
 
-            // 今日の予約（開始時刻が1時間以内）
-            if (isSameDay(bookingDate, today) && hoursUntilStart >= 0 && hoursUntilStart <= 1) {
-                newNotifications.push({
-                    id: `today-${booking.id}`,
-                    type: 'today',
-                    message: `予約が1時間以内に開始します`,
-                    bookingId: booking.id,
-                    bookingTitle: booking.title,
-                    time: bookingStart.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }),
-                    isRead: false,
-                });
+                    console.log("APIから来たデータ:", responseData);
+
+                    const list = responseData.notifications || [];
+                    
+                    // バックエンドのデータをフロント用に変換
+                    const formatted: Notification[] = list.map(n => ({
+                        id: String(n.id),
+                        bookingId: String(n.bookingId), // IDの型変換
+                        bookingTitle: n.bookingTitle,
+                        type: convertType(n.notificationType), // 下で定義する変換関数を使う
+                        message: n.message,
+                        time: new Date(n.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }),
+                        isRead: n.isRead,
+                        createdAt: n.createdAt
+                    }));
+
+                    setNotifications(formatted);
+                }
+            } catch (error) {
+                console.error("通知取得エラー", error);
             }
-
-            // 明日の予約
-            if (isSameDay(bookingDate, tomorrow)) {
-                newNotifications.push({
-                    id: `tomorrow-${booking.id}`,
-                    type: 'tomorrow',
-                    message: `明日の予約があります`,
-                    bookingId: booking.id,
-                    bookingTitle: booking.title,
-                    time: bookingStart.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }),
-                    isRead: false,
-                });
-            }
-
-            // キャンセルされた予約
-            if (booking.color === '#ef4444') {
-                newNotifications.push({
-                    id: `cancelled-${booking.id}`,
-                    type: 'cancelled',
-                    message: `予約がキャンセルされました`,
-                    bookingId: booking.id,
-                    bookingTitle: booking.title,
-                    time: bookingStart.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }),
-                    isRead: false,
-                });
-            }
-        });
-
-        // 既存の通知とマージ（重複を避ける）
-        setNotifications(prev => {
-            const existingIds = new Set(prev.map(n => n.id));
-            const newOnes = newNotifications.filter(n => !existingIds.has(n.id));
-            return [...prev, ...newOnes].sort((a, b) => {
-                const aBooking = bookings.find(booking => booking.id === a.bookingId);
-                const bBooking = bookings.find(booking => booking.id === b.bookingId);
-                const aTime = new Date(aBooking?.start || 0).getTime();
-                const bTime = new Date(bBooking?.start || 0).getTime();
-                return bTime - aTime;
-            });
-        });
     }, []);
 
-    // ★ これがないと、通知生成処理が走りません！
     useEffect(() => {
-        if (bookings.length > 0) {
-            generateNotifications(bookings);
-        }
-    }, [bookings, generateNotifications]);
+        fetchNotifications();
+    },[])
 
-    // 通知を既読にする
-    const markAsRead = (notificationId: string) => {
+   // 3. 既読にする（API連携）
+   const markAsRead = async (notificationId: string) => {
+        // 先に見た目だけ更新（UX向上: Optimistic UI）
         setNotifications(prev =>
             prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
         );
+
+        // 裏でAPIを叩く
+        try {
+            await apiClient(`/notifications/${notificationId}/read`, { method: "PUT" });
+        } catch (error) {
+            console.error("既読更新エラー", error);
+            // エラー時は元に戻す処理を入れても良い
+        }
     };
 
-    // すべての通知を既読にする
-    const markAllAsRead = () => {
+    // 4. 全て既読にする（API連携）
+    const markAllAsRead = async () => {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+
+        try {
+            await apiClient(`/notifications/read-all`, { method: "PUT" });
+        } catch (error) {
+            console.error("全既読エラー", error);
+        }
     };
 
-     const unreadCount = notifications.filter(n => !n.isRead).length;
+    const unreadCount = notifications.filter(n => !n.isRead).length;
 
     // フックとして返すもの
     return {
@@ -118,6 +101,15 @@ export const useNotifications = (bookings: Booking[]) => {
         markAsRead,
         markAllAsRead
     };
-
-
 }
+
+// ヘルパー関数: JavaのEnumをフロントのtypeに変換
+const convertType = (backendType: BackendNotificationDto['notificationType']): Notification['type'] => {
+    switch (backendType) {
+        case 'NEW': return 'new';
+        case 'CANCEL': return 'cancelled';
+        case 'TODAY': return 'today';
+        case 'TOMORROW': return 'tomorrow';
+        default: return 'new'; // デフォルト
+    }
+};
