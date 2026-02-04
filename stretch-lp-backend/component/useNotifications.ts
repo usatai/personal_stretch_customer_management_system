@@ -74,7 +74,7 @@ export const useNotifications = () => {
 
         // 裏でAPIを叩く
         try {
-            await apiClient(`/notifications/${notificationId}/read`, { method: "PUT" });
+            await apiClient(`/notification/${notificationId}/read`, { method: "PUT" });
         } catch (error) {
             console.error("既読更新エラー", error);
             // エラー時は元に戻す処理を入れても良い
@@ -86,7 +86,7 @@ export const useNotifications = () => {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
 
         try {
-            await apiClient(`/notifications/read-all`, { method: "PUT" });
+            await apiClient(`/notification/read-all`, { method: "PUT" });
         } catch (error) {
             console.error("全既読エラー", error);
         }
