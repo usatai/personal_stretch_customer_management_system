@@ -5,7 +5,7 @@ export type Notification = {
     id: string;
     type: 'today' | 'tomorrow' | 'new' | 'cancelled';
     bookingId: string;
-    bookingTitle: string;
+    customerName: string;
     bookingDate: string;
     message: string;
     time: string;
@@ -16,7 +16,7 @@ export type Notification = {
 type BackendNotificationDto = {
     id: number;
     bookingId: number;
-    bookingTitle: string;
+    customerName: string;
     notificationType: 'NEW' | 'CANCEL' | 'TODAY' | 'TOMORROW'; // JavaのEnum文字列
     isRead: boolean;
     message: string;
@@ -48,7 +48,7 @@ export const useNotifications = () => {
                     const formatted: Notification[] = list.map(n => ({
                         id: String(n.id),
                         bookingId: String(n.bookingId), // IDの型変換
-                        bookingTitle: n.bookingTitle,
+                        customerName: n.customerName,
                         type: convertType(n.notificationType), // 下で定義する変換関数を使う
                         time: new Date(n.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit',minute: '2-digit' }),
                         bookingDate: new Date(n.bookingDate).toLocaleTimeString('ja-JP', { hour: '2-digit',minute: '2-digit' }),

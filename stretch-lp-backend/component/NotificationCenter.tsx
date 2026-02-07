@@ -170,7 +170,7 @@ export const NotificationCenter = ({
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start mb-1">
                                                 <p className={`text-sm truncate pr-2 ${!n.isRead ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
-                                                    {n.bookingTitle}
+                                                    {n.customerName}
                                                 </p>
                                                 {/* 未読の青い点 */}
                                                 {!n.isRead && <span className="w-2 h-2 bg-cyan-500 rounded-full mt-1.5 flex-shrink-0" />}
