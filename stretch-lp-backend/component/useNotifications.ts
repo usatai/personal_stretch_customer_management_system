@@ -4,9 +4,10 @@ import { apiClient } from '@/utils/apiClient';
 export type Notification = {
     id: string;
     type: 'today' | 'tomorrow' | 'new' | 'cancelled';
-    message: string;
     bookingId: string;
     bookingTitle: string;
+    bookingDate: string;
+    message: string;
     time: string;
     isRead: boolean;
 };
@@ -17,8 +18,9 @@ type BackendNotificationDto = {
     bookingId: number;
     bookingTitle: string;
     notificationType: 'NEW' | 'CANCEL' | 'TODAY' | 'TOMORROW'; // JavaのEnum文字列
-    message: string;
     isRead: boolean;
+    message: string;
+    bookingDate: string;
     createdAt: string;
 };
 
@@ -48,8 +50,9 @@ export const useNotifications = () => {
                         bookingId: String(n.bookingId), // IDの型変換
                         bookingTitle: n.bookingTitle,
                         type: convertType(n.notificationType), // 下で定義する変換関数を使う
+                        time: new Date(n.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit',minute: '2-digit' }),
+                        bookingDate: new Date(n.bookingDate).toLocaleTimeString('ja-JP', { hour: '2-digit',minute: '2-digit' }),
                         message: n.message,
-                        time: new Date(n.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }),
                         isRead: n.isRead,
                         createdAt: n.createdAt
                     }));

@@ -175,6 +175,11 @@ export const NotificationCenter = ({
                                                 {/* 未読の青い点 */}
                                                 {!n.isRead && <span className="w-2 h-2 bg-cyan-500 rounded-full mt-1.5 flex-shrink-0" />}
                                             </div>
+                                            <div className="flex justify-between items-start mb-1">
+                                                <p className="text-sm truncate pr-2 font-bold text-gray-900">
+                                                    予約時刻:{n.bookingDate}
+                                                </p>
+                                            </div>
                                             <p className="text-xs text-gray-600 mb-1 line-clamp-2 leading-relaxed">
                                                 {n.message}
                                             </p>
